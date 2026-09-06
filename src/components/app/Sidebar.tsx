@@ -21,6 +21,9 @@ import { Separator} from '@/components/ui/separator';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '../ui/button';
+import SidebarDarkLogo from '@/assets/sidebar_dark_logo.png'
+import SidebarLightLogo from '@/assets/sidebar_light_logo.png'
+import { useTheme } from '@/contexts/ThemeContext';
 
 // TypeScript now knows: sidebarCollapsed → boolean, setCollapsed → function
 type SidebarProps = {
@@ -65,8 +68,14 @@ const Sidebar = ({
 } : SidebarProps) =>{ 
 
     const {user, logout} = useAuth();
+    const { resolvedTheme } = useTheme();
 
     if(!user) return null;
+
+    const sidebarLogo =
+        resolvedTheme === "dark"
+            ? SidebarDarkLogo
+            : SidebarLightLogo;
 
     return ( 
     // 'aside' -> HTML semantic tag. Used for sidebars and secondary content. 
@@ -78,13 +87,41 @@ const Sidebar = ({
             skipDelayDuration={300}
         >
             {/* Logo:  */}
-            <div className="mb-8">
-                {!sidebarCollapsed && (
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        JournalFlow
-                    </h2>
-                )}
-            </div>
+            <div
+    className={`
+        mb-8
+        flex
+        items-center
+        ${sidebarCollapsed
+            ? "justify-center"
+            : "justify-start gap-3"
+        }
+    `}
+>
+    <img
+        src={sidebarLogo}
+        alt="JournalFlow"
+        className={`
+            h-9
+            w-9
+            shrink-0
+            object-contain
+        `}
+    />
+
+    {!sidebarCollapsed && (
+        <span
+            className="
+                text-2xl
+                font-bold
+                tracking-tight
+                mt-2
+            "
+        >
+            JournalFlow
+        </span>
+    )}
+</div>
 
             {/* 'nav' -> HTML tag for navigation links. */}
             <nav className="flex-1 space-y-2" > {/* 'flex-1' consumes all available space and pushes everything below it to the bottom... */}

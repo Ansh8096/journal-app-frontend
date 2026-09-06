@@ -1,5 +1,3 @@
-import { Input } from "@/components/ui/input";
-
 import {
     Avatar,
     AvatarFallback,
@@ -17,8 +15,6 @@ import {
     User,
     Settings,
     LogOut,
-    Search,
-    Bell,
     Menu
 } from "lucide-react";
 
@@ -99,16 +95,6 @@ export default function Navbar({
         
 
         <div className="flex items-center gap-2">
-
-            {/* Notification */}
-            {/* <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Notifications"
-            >
-                <Bell className="h-5 w-5" />
-            </Button> */}
                                 
             {/* Theme */}
             <ThemeToggle />
