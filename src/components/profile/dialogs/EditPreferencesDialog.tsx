@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 
 import { profileConfig } from "../Config";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -32,11 +33,29 @@ import {
 } from "@/schemas/profile/personal-information";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, type EventHandler } from "react";
+
+import {
+    useEffect,
+    type EventHandler,
+} from "react";
+
 import LoadingSubmitButton from "@/components/common/LoadingSubmitButton";
+
 import { toast } from "sonner";
-import { useProfileMutations } from "@/hooks/useProfileMutations";
+
+import {
+    useProfileMutations,
+} from "@/hooks/useProfileMutations";
+
 import { getErrorMessage } from "@/lib/error";
+
+import {
+    useQueryClient,
+} from "@tanstack/react-query";
+
+import {
+    weatherKeys,
+} from "@/lib/react-query/query-keys";
 
 type EditPreferencesDialogProps = {
     open: boolean;
@@ -47,136 +66,266 @@ export function EditPreferencesDialog({
     open,
     onOpenChange,
 }: EditPreferencesDialogProps) {
+    const {
+        user,
+        refreshUser,
+    } = useAuth();
 
-    const {user} = useAuth();
-    const {updatePreferences} = useProfileMutations();
+    const {
+        updatePreferences,
+    } = useProfileMutations();
 
-    const form = useForm<PreferencesFormData>({
-        resolver: zodResolver(preferencesSchema),
-        defaultValues: {
-            city: "",
-            sentimentAnalysisEnabled: false,
-        },
-    });
+    const queryClient =
+        useQueryClient();
+
+    const form =
+        useForm<PreferencesFormData>({
+            resolver:
+                zodResolver(
+                    preferencesSchema,
+                ),
+            defaultValues: {
+                city: "",
+                sentimentAnalysisEnabled:
+                    false,
+            },
+        });
 
     const onSubmit = async (
         data: PreferencesFormData,
     ) => {
         try {
-            const result = await updatePreferences(data);
+            /*
+             * ----------------------------------------
+             * 1. Update preferences on the backend
+             * ----------------------------------------
+             */
+            const result =
+                await updatePreferences(
+                    data,
+                );
 
             if (!result.updated) {
                 onOpenChange(false);
                 return;
             }
 
+            /*
+             * ----------------------------------------
+             * 2. Refresh AuthContext user
+             *
+             * This updates user.city immediately
+             * so the rest of the application now
+             * knows about the new city.
+             * ----------------------------------------
+             */
+            await refreshUser();
+
+            /*
+             * ----------------------------------------
+             * 3. Invalidate + refetch weather
+             *
+             * The weather endpoint reads the current
+             * user's city, so after the profile update
+             * we must fetch weather again.
+             * ----------------------------------------
+             */
+            await queryClient.invalidateQueries({
+                queryKey:
+                    weatherKeys.current(),
+                refetchType: "all",
+            });
+
             toast.success(
-                "Preferences updated successfully."
+                "Preferences updated successfully.",
             );
 
             onOpenChange(false);
         } catch (error) {
-            toast.error(getErrorMessage(error));
+            toast.error(
+                getErrorMessage(error),
+            );
         }
     };
 
+    /*
+     * Populate form with current user data
+     * whenever the dialog opens.
+     */
     useEffect(() => {
         if (!open || !user) {
             return;
         }
 
         form.reset({
-            city: user.city ?? "",
+            city:
+                user.city ?? "",
+
             sentimentAnalysisEnabled:
                 user.sentimentAnalysisEnabled,
         });
-    }, [form, open, user]);
+    }, [
+        form,
+        open,
+        user,
+    ]);
 
-    const preventCloseWhileSubmitting : EventHandler<any> = (e) =>{
-        if (form.formState.isSubmitting) {
-            e.preventDefault();
+    const preventCloseWhileSubmitting: EventHandler<any> = (
+        event,
+    ) => {
+        if (
+            form.formState
+                .isSubmitting
+        ) {
+            event.preventDefault();
         }
-    }
+    };
 
     return (
         <Dialog
             open={open}
-            onOpenChange={(nextOpen) =>{
-                if(form.formState.isSubmitting) return; // The dialog shouldn't disappear while the request is in flight.
-                onOpenChange(nextOpen);
+            onOpenChange={(
+                nextOpen,
+            ) => {
+                if (
+                    form.formState
+                        .isSubmitting
+                ) {
+                    return;
+                }
+
+                onOpenChange(
+                    nextOpen,
+                );
             }}
         >
-            <DialogContent 
+            <DialogContent
                 className="sm:max-w-lg"
-                onOpenAutoFocus={(e) => {
-                    e.preventDefault();
+                onOpenAutoFocus={(
+                    event,
+                ) => {
+                    event.preventDefault();
                 }}
-                onPointerDownOutside={preventCloseWhileSubmitting}
-                onEscapeKeyDown={preventCloseWhileSubmitting}
+                onPointerDownOutside={
+                    preventCloseWhileSubmitting
+                }
+                onEscapeKeyDown={
+                    preventCloseWhileSubmitting
+                }
             >
                 <DialogHeader>
                     <DialogTitle>
-                        {profileConfig.dialogs.preferences.title}
+                        {
+                            profileConfig
+                                .dialogs
+                                .preferences
+                                .title
+                        }
                     </DialogTitle>
 
                     <DialogDescription>
-                        {profileConfig.dialogs.preferences.description}
+                        {
+                            profileConfig
+                                .dialogs
+                                .preferences
+                                .description
+                        }
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="py-2">
                     <Form {...form}>
                         <form
-                            onSubmit={form.handleSubmit(onSubmit)}
+                            onSubmit={
+                                form.handleSubmit(
+                                    onSubmit,
+                                )
+                            }
                             className="space-y-6"
                         >
+                            {/* City */}
                             <FormField
-                                control={form.control}
+                                control={
+                                    form.control
+                                }
                                 name="city"
-                                render={({ field }) => (
+                                render={({
+                                    field,
+                                }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            {profileConfig.labels.city}
+                                            {
+                                                profileConfig
+                                                    .labels
+                                                    .city
+                                            }
                                         </FormLabel>
-                                
+
                                         <FormControl>
                                             <Input
                                                 autoComplete="address-level2"
                                                 placeholder={
-                                                    profileConfig.placeholders.city
+                                                    profileConfig
+                                                        .placeholders
+                                                        .city
                                                 }
-                                                disabled={form.formState.isSubmitting}
+                                                disabled={
+                                                    form
+                                                        .formState
+                                                        .isSubmitting
+                                                }
                                                 {...field}
                                             />
                                         </FormControl>
-                                            
+
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
+                            {/* Sentiment Analysis */}
                             <FormField
-                                control={form.control}
+                                control={
+                                    form.control
+                                }
                                 name="sentimentAnalysisEnabled"
-                                render={({ field }) => (
+                                render={({
+                                    field,
+                                }) => (
                                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
                                         <FormControl>
                                             <Checkbox
-                                                checked={field.value}
-                                                disabled={form.formState.isSubmitting}
-                                                onCheckedChange={field.onChange}
+                                                checked={
+                                                    field.value
+                                                }
+                                                disabled={
+                                                    form
+                                                        .formState
+                                                        .isSubmitting
+                                                }
+                                                onCheckedChange={
+                                                    field.onChange
+                                                }
                                             />
                                         </FormControl>
-                                
+
                                         <div className="space-y-1 leading-none">
                                             <FormLabel>
-                                                {profileConfig.labels.sentimentAnalysis}
+                                                {
+                                                    profileConfig
+                                                        .labels
+                                                        .sentimentAnalysis
+                                                }
                                             </FormLabel>
-                                
+
                                             <FormDescription>
-                                                {profileConfig.descriptions.weeklySentimentEmails}
+                                                {
+                                                    profileConfig
+                                                        .descriptions
+                                                        .weeklySentimentEmails
+                                                }
                                             </FormDescription>
-                                
+
                                             <FormMessage />
                                         </div>
                                     </FormItem>
@@ -187,28 +336,54 @@ export function EditPreferencesDialog({
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    disabled={form.formState.isSubmitting}
+                                    disabled={
+                                        form
+                                            .formState
+                                            .isSubmitting
+                                    }
                                     onClick={() => {
-                                        // when the upload is cancelled, reset form user actual details... 
-                                        if (user) {
+                                        if (
+                                            user
+                                        ) {
                                             form.reset({
-                                                city: user.city ?? "",
-                                                sentimentAnalysisEnabled: user.sentimentAnalysisEnabled,
+                                                city:
+                                                    user.city ??
+                                                    "",
+                                                sentimentAnalysisEnabled:
+                                                    user.sentimentAnalysisEnabled,
                                             });
                                         }
-                                        onOpenChange(false);
+
+                                        onOpenChange(
+                                            false,
+                                        );
                                     }}
                                 >
-                                    {profileConfig.actions.cancel}
+                                    {
+                                        profileConfig
+                                            .actions
+                                            .cancel
+                                    }
                                 </Button>
-                            
-                                <LoadingSubmitButton
-                                    loading={form.formState.isSubmitting}
-                                    loadingText={profileConfig.actions.saving}
-                                >
-                                    {profileConfig.actions.save}
-                                </LoadingSubmitButton>
 
+                                <LoadingSubmitButton
+                                    loading={
+                                        form
+                                            .formState
+                                            .isSubmitting
+                                    }
+                                    loadingText={
+                                        profileConfig
+                                            .actions
+                                            .saving
+                                    }
+                                >
+                                    {
+                                        profileConfig
+                                            .actions
+                                            .save
+                                    }
+                                </LoadingSubmitButton>
                             </DialogFooter>
                         </form>
                     </Form>

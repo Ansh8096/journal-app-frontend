@@ -31,7 +31,7 @@ export function PersonalInformationCard({
     }
 
     return (
-        <Card>
+        <Card className="rounded-none">
             <CardHeader>
                 <CardTitle>
                     {profileConfig.cards.personalInformation.title}

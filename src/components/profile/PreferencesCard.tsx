@@ -28,7 +28,7 @@ export function PreferencesCard({
     }
 
     return (
-        <Card>
+        <Card className="rounded-none">
             <CardHeader className="space-y-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
