@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
@@ -144,4 +145,45 @@
   html {
     @apply font-sans;
     }
+}
+
+
+/* ===== Blockquote ===== */
+
+.ProseMirror blockquote {
+    position: relative;
+    
+    padding: 1rem 1.25rem 1rem 1.5rem;
+
+    border-left: 4px solid rgb(139 92 246);
+
+    border-radius: 0.75rem;
+
+    background: rgb(245 243 255);
+
+    color: rgb(71 85 105);
+
+    font-style: italic;
+
+    transition: background-color 0.2s ease;
+}
+
+.ProseMirror blockquote:hover {
+    background: rgb(237 233 254);
+}
+
+.ProseMirror blockquote p {
+    margin: 0;
+}
+
+/* Dark mode */
+.dark .ProseMirror blockquote {
+    border-left-color: rgb(124 58 237);
+    background: rgb(46 16 70);
+    color: rgb(226 232 240);
+}
+
+.dark .ProseMirror blockquote:hover {
+    background: rgb(59 24 88);
+    color: rgb(241 245 249);
 }

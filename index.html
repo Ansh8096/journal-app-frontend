@@ -1,13 +1,85 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>journalapp-frontend</title>
-  </head>
-  <body>
+
+    <title>JournalFlow</title>
+
+    <!-- Theme initialization -->
+    <script>
+        (() => {
+            try {
+                const storageKey =
+                    "journalflow-theme";
+
+                const rawTheme =
+                    localStorage.getItem(
+                        storageKey,
+                    );
+
+                let storedTheme = null;
+
+                if (rawTheme) {
+                    try {
+                        storedTheme =
+                            JSON.parse(
+                                rawTheme,
+                            );
+                    } catch {
+                        /*
+                         * Backward compatibility for
+                         * older raw-string storage.
+                         */
+                        storedTheme =
+                            rawTheme;
+                    }
+                }
+
+                const isValidTheme =
+                    storedTheme === "light" ||
+                    storedTheme === "dark" ||
+                    storedTheme === "system";
+
+                const theme =
+                    isValidTheme
+                        ? storedTheme
+                        : "light";
+
+                let resolvedTheme =
+                    theme;
+
+                if (theme === "system") {
+                    resolvedTheme =
+                        window.matchMedia(
+                            "(prefers-color-scheme: dark)",
+                        ).matches
+                            ? "dark"
+                            : "light";
+                }
+
+                document.documentElement.classList.toggle(
+                    "dark",
+                    resolvedTheme ===
+                    "dark",
+                );
+            } catch {
+                /*
+                 * Safe fallback.
+                 */
+                document.documentElement.classList.remove(
+                    "dark",
+                );
+            }
+        })();
+    </script>
+</head>
+
+<body>
     <div id="root"></div>
+
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
+
 </html>
