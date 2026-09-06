@@ -1,21 +1,12 @@
 import { z } from "zod";
 
-import {
-    MOOD_OPTIONS,
-} from "@/constants/journal/journal-details";
+import { MOOD_OPTIONS } from "@/constants/journal/journal-details";
 
-import type {
-    Mood,
-} from "@/types/common/mood";
+import type { Mood } from "@/types/common/mood";
 
-import {
-    journalConstants,
-} from "@/constants/journal/journal-constants";
+import { journalConstants } from "@/constants/journal/journal-constants";
 
-import {
-    isRichTextEmpty,
-} from "@/lib/validation/isRichTextEmpty";
-
+import { isRichTextEmpty } from "@/lib/validation/isRichTextEmpty";
 
 /**
  * --------------------------------
@@ -23,14 +14,10 @@ import {
  * --------------------------------
  */
 
-const moodValues =
-    MOOD_OPTIONS.map(
-        (option) => option.value,
-    ) as [
-        Mood,
-        ...Mood[],
-    ];
-
+const moodValues = MOOD_OPTIONS.map((option) => option.value) as [
+    Mood,
+    ...Mood[],
+];
 
 /**
  * --------------------------------
@@ -38,44 +25,24 @@ const moodValues =
  * --------------------------------
  */
 
-export const editJournalSchema =
-    z.object({
+export const editJournalSchema = z.object({
+    title: z
+        .string()
+        .trim()
+        .min(1, "Title is required.")
+        .max(
+            journalConstants.validation.title.maxLength,
+            `Title cannot exceed ${journalConstants.validation.title.maxLength} characters.`,
+        ),
 
-        title:
-            z
-                .string()
-                .trim()
-                .max(
-                    journalConstants.validation
-                        .title.maxLength,
+    content: z.string().refine((value) => !isRichTextEmpty(value), {
+        message: "Journal content is required.",
+    }),
 
-                    `Title cannot exceed ${journalConstants.validation.title.maxLength} characters.`,
-                ),
+    mood: z.enum(moodValues, {
+        error: "Please select a mood.",
+    }),
+    tags: z.array(z.string()),
+});
 
-        content:
-            z
-                .string(),
-
-        mood:
-            z
-                .enum(
-                    moodValues,
-                    {
-                        error:
-                            "Please select a mood.",
-                    },
-                )
-                .nullable(),
-
-        tags:
-            z.array(
-                z.string(),
-            ),
-
-    });
-
-
-export type EditJournalFormValues =
-    z.infer<
-        typeof editJournalSchema
-    >;
+export type EditJournalFormValues = z.infer<typeof editJournalSchema>;

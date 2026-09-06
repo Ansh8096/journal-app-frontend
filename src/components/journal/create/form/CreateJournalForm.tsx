@@ -66,6 +66,7 @@ import {
 } from "@/constants/routes";
 import { isDraftEmpty } from "@/lib/validation/isDraftEmpty";
 import { hasUnsavedJournalData } from "@/lib/validation/hasUnsavedJournalData";
+import { clearCreateJournalRecovery } from "@/lib/journal/create-journal-recovery";
 
 
 export default function CreateJournalForm() {
@@ -322,6 +323,8 @@ export default function CreateJournalForm() {
                     createdJournal,
                 ) => {
 
+                    clearCreateJournalRecovery();
+
                     /**
                      * Release local
                      * preview URLs because
@@ -544,6 +547,8 @@ export default function CreateJournalForm() {
             {
                 onSuccess: () => {
 
+                    clearCreateJournalRecovery();
+
                     /**
                      * Release image preview URLs.
                      */
@@ -563,7 +568,6 @@ export default function CreateJournalForm() {
                      * Clear images.
                      */
                     setImages([]);
-
 
                     /**
                      * Reset form.
@@ -615,37 +619,45 @@ export default function CreateJournalForm() {
 
     const handleConfirmDiscard = () => {
 
-        if (isSubmitting) {
-            return;
-        }
+    if (isSubmitting) {
+        return;
+    }
 
-        // RELEASE IMAGE PREVIEW URLS
-        images.forEach(
-            (image) => {
-
-                URL.revokeObjectURL(
-                    image.previewUrl,
-                );
-
-            },
+    // Release image preview URLs.
+    images.forEach((image) => {
+        URL.revokeObjectURL(
+            image.previewUrl,
         );
+    });
 
-        imagesRef.current = [];
+    imagesRef.current = [];
 
-        setImages([]);
+    // Clear selected images.
+    setImages([]);
 
-        form.reset();
+    // Remove persisted recovery data.
+    clearCreateJournalRecovery();
 
-        setIsDiscardDialogOpen(false);
+    // IMPORTANT:
+    // Reset to EMPTY values instead of the
+    // recovered default values.
+    form.reset({
+        title: "",
+        content: "",
+        mood: null,
+        tags: [],
+    });
 
-        toast.success(
-            "Journal discarded",
-            {
-                description:
-                    "Your unsaved journal has been cleared.",
-            },
-        );
-    };
+    setIsDiscardDialogOpen(false);
+
+    toast.success(
+        "Journal discarded",
+        {
+            description:
+                "Your unsaved journal has been cleared.",
+        },
+    );
+};
 
     return (
         <form

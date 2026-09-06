@@ -69,47 +69,50 @@ export default function ImageDropzone({
                 sm:py-10
                 `,
                 disabled &&
-                    `
+                `
                     cursor-not-allowed
                     opacity-60
                     `,
                 isDragging &&
-                    !disabled &&
-                    `
+                !disabled &&
+                `
                     border-violet-500
                     bg-violet-50
                     shadow-sm
-                    dark:bg-violet-950/20
-                    `,
+                    dark:border-violet-400
+                    dark:bg-violet-950/30
+                `,
                 !isDragging &&
-                    !disabled &&
-                    `
+                !disabled &&
+                `
                     border-border
                     bg-transparent
                     hover:border-violet-300
                     hover:bg-violet-50/30
-                    dark:hover:bg-violet-950/10
-                    `,
+                    dark:hover:border-violet-700
+                    dark:hover:bg-violet-950/15
+                `,
             )}
         >
             <div
                 className="
-                    mb-3
-                    rounded-full
-                    bg-violet-50
-                    p-3
-                    dark:bg-violet-950/30
-                "
+        mb-3
+        rounded-full
+        bg-violet-50
+        p-3
+        dark:bg-violet-950/30
+    "
             >
                 <Image
                     aria-hidden="true"
                     className="
-                        h-6
-                        w-6
-                        text-violet-600
-                        sm:h-7
-                        sm:w-7
-                    "
+        h-6
+        w-6
+        text-violet-600
+        dark:text-violet-400
+        sm:h-7
+        sm:w-7
+    "
                 />
             </div>
 

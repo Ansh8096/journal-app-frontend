@@ -217,7 +217,10 @@ export const JOURNAL_EDITOR_CONTENT_CLASS = `
     [&_.ProseMirror]:min-h-[400px]
     [&_.ProseMirror]:outline-none
     [&_.ProseMirror]:scroll-smooth
+
     [&_.ProseMirror]:caret-violet-600
+    dark:[&_.ProseMirror]:caret-violet-400
+
     [&_.ProseMirror]:px-4
     [&_.ProseMirror]:py-4
     sm:[&_.ProseMirror]:px-6
@@ -228,6 +231,7 @@ export const JOURNAL_EDITOR_CONTENT_CLASS = `
     [&_.ProseMirror]:text-foreground
 
     [&_.ProseMirror]:selection:bg-violet-200
+    dark:[&_.ProseMirror]:selection:bg-violet-800/60
     [&_.ProseMirror]:selection:text-foreground
 
     [&_.ProseMirror:focus]:outline-none
@@ -275,9 +279,14 @@ export const JOURNAL_EDITOR_CONTENT_CLASS = `
     [&_.ProseMirror_blockquote]:my-5
     [&_.ProseMirror_blockquote]:border-l-4
     [&_.ProseMirror_blockquote]:border-violet-300
+    [&_.ProseMirror_blockquote]:bg-violet-50
+    [&_.ProseMirror_blockquote]:text-slate-700
     [&_.ProseMirror_blockquote]:pl-4
     [&_.ProseMirror_blockquote]:italic
-    [&_.ProseMirror_blockquote]:text-muted-foreground
+
+    dark:[&_.ProseMirror_blockquote]:border-violet-600
+    dark:[&_.ProseMirror_blockquote]:bg-violet-950/30
+    dark:[&_.ProseMirror_blockquote]:text-slate-200
 
     [&_.ProseMirror_hr]:my-8
 

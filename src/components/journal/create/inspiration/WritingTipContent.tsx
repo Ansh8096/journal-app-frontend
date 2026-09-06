@@ -21,16 +21,26 @@ export function WritingTipContent({
         >
             <div className="flex items-center gap-1.5">
                 <Lightbulb
-                    className="h-4 w-4 text-violet-600"
-                    aria-hidden="true"
-                />
+    className="
+        h-4
+        w-4
+        text-violet-600
+        dark:text-violet-400
+    "
+    aria-hidden="true"
+/>
 
-                <h3
-                    id="writing-tip-title"
-                    className="text-sm font-semibold text-violet-600"
-                >
-                    {tip.title}
-                </h3>
+<h3
+    id="writing-tip-title"
+    className="
+        text-sm
+        font-semibold
+        text-violet-600
+        dark:text-violet-400
+    "
+>
+    {tip.title}
+</h3>
             </div>
 
             <p className="whitespace-pre-line text-sm leading-6 text-foreground">
