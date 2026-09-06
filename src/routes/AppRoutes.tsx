@@ -10,6 +10,10 @@ import SettingsPage from "@/pages/settings/SettingsPage";
 import DashBoardPage from "@/pages/dashboard/DashboardPage";
 import CreateJournalPage from "@/pages/journal/CreateJournalPage";
 import JournalDetailsPage from "@/pages/journal/JournalDetailsPage";
+import EditJournalPage from "@/pages/journal/EditJournalPage";
+import EditDraftPage from "@/pages/journal/EditDraftPage";
+import MyDrafts from "@/pages/journal/MyDraftsPage";
+import OAuth2CallbackPage from "@/pages/auth/OAuth2CallbackPage";
 
 
 const AppRoutes = () => {
@@ -38,6 +42,13 @@ const AppRoutes = () => {
                 <Route
                     path={ROUTES.SIGNUP}
                     element={<SignupPage />}
+                />
+
+                <Route
+                    path="/oauth2/callback"
+                    element={
+                        <OAuth2CallbackPage />
+                    }
                 />
 
             </Route>
@@ -75,8 +86,22 @@ const AppRoutes = () => {
                     element={<CreateJournalPage/>}
                 />
                 
+                
+                <Route 
+                    path={ROUTES.EDIT_JOURNAL}
+                    element={<EditJournalPage/>}
+                />
 
-
+                <Route 
+                    path={ROUTES.EDIT_DRAFT}
+                    element={<EditDraftPage/>}
+                />
+\
+                <Route
+                    path={ROUTES.DRAFTS}
+                    element={<MyDrafts/>}
+                />
+                
             </Route>            
             
           {/* 404 */}
