@@ -7,9 +7,9 @@ const client = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     timeout: 10000, // "Wait at most 10 seconds for the server.", If the backend doesn't respond within 10 seconds:
     headers: {
-        "Content-Type": "application/json",
         Accept: "application/json",
     },
+    withCredentials: true,
 });
 
 client.interceptors.request.use(
