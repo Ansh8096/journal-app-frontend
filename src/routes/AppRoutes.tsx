@@ -45,7 +45,7 @@ const AppRoutes = () => {
                 />
 
                 <Route
-                    path="/oauth2/callback"
+                    path={ROUTES.OAUTH2CALLBACK}
                     element={
                         <OAuth2CallbackPage />
                     }

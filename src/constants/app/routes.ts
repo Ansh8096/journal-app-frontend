@@ -1,6 +1,7 @@
 export const ROUTES = {
     LOGIN: "/login",
     SIGNUP: "/signup",
+    OAUTH2CALLBACK: "/oauth2/callback",
 
     DASHBOARD: "/dashboard",
     JOURNALS: "/journals", // journals list 
@@ -13,6 +14,7 @@ export const ROUTES = {
     DRAFTS: "/journals/drafts",
     DRAFTS2: "/journals/drafts2",
     EDIT_DRAFT: "/journals/drafts/:draftId/edit",
+
 } as const;
 
 export const buildJournalDetailsRoute = (journalId: string) =>

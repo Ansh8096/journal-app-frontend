@@ -17,15 +17,6 @@ interface DeleteJournalImageVariables {
     publicId: string;
 }
 
-interface DeleteImageContext {
-    previousJournal?: JournalResponse;
-
-    previousJournalLists: [
-        readonly unknown[],
-        JournalPageResponse | undefined,
-    ][];
-}
-
 export function useDeleteJournalImage() {
 
     const queryClient =

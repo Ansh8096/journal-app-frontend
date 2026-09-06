@@ -16,9 +16,6 @@ interface UploadImagesVariables {
     files: File[];
 }
 
-interface UploadContext {
-    previousJournal?: JournalResponse;
-}
 
 export function useUploadJournalImages() {
     const queryClient = useQueryClient();

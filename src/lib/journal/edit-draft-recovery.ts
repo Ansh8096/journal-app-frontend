@@ -9,10 +9,6 @@ import {
     type EditDraftRecoveryData,
 } from "@/schemas/journal/edit-draft-recovery.schema";
 
-import type {
-    EditDraftFormValues,
-} from "@/schemas/journal/edit-draft.schema";
-
 const RECOVERY_VERSION = 1;
 
 type RecoverableEditDraftValues =

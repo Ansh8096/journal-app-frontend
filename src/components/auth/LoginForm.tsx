@@ -17,7 +17,6 @@ import PasswordInput from "./PasswordInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
@@ -28,7 +27,7 @@ import {
 
 import { useAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/app/routes";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/error";
 import GoogleLoginButton from "./GoogleLoginButton";
@@ -54,15 +53,6 @@ const LoginForm = () => {
         resolver: zodResolver(loginSchema),
         defaultValues: loginDefaultValues,
     });
-
-    /*
-     * UI-only "Remember me" state — not part of loginSchema/
-     * LoginFormValues, whose shape I don't have visibility into.
-     * Defaulted to true to visually match the Target UI's checked
-     * state; wire this into your real login request once your
-     * backend supports it.
-     */
-    const [rememberMe, setRememberMe] = useState(true);
 
     useEffect(() => {
 

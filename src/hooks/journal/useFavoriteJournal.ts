@@ -19,12 +19,6 @@ interface UpdateFavoriteVariables {
     journalId: string;
     request: UpdateFavoriteRequest;
 }
-
-interface MutationContext {
-    previousJournal?: JournalResponse;
-    previousJournalLists: [readonly unknown[], JournalPageResponse | undefined][];
-}
-
 export function useFavoriteJournal() {
     const queryClient = useQueryClient();
 

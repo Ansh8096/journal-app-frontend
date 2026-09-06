@@ -2,9 +2,6 @@ import {
     BookOpen,
     CalendarDays,
     FilePenLine,
-    Lightbulb,
-    ListTodo,
-    Pencil,
 } from "lucide-react";
 
 export const draftPageConfig = {

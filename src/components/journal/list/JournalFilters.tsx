@@ -1,9 +1,6 @@
 import {
-    ArrowUpDown,
     RotateCcw,
     Search,
-    Smile,
-    Star,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

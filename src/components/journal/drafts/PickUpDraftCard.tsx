@@ -1,7 +1,6 @@
 // PickUpDraftCard.tsx
 import {
     FileImage,
-    SquarePen,
 } from "lucide-react";
 
 import {
