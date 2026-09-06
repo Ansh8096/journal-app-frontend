@@ -40,7 +40,7 @@ export default function ThemeToggle() {
 
     return (
         <TooltipProvider>
-            <Tooltip>
+            <Tooltip key={resolvedTheme}>
                 <TooltipTrigger asChild>
                     <Button
                         type="button"

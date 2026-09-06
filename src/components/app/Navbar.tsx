@@ -28,7 +28,7 @@ import { Button } from "../ui/button";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import {ROUTES} from "@/constants/app/routes"
+import { ROUTES } from "@/constants/app/routes"
 import { getUserInitials } from "@/utils/user/user";
 import ThemeToggle from "./ThemeToggle";
 
@@ -40,16 +40,16 @@ type NavbarProps = {
 export default function Navbar({
     sidebarCollapsed,
     onToggleSidebar,
-} : NavbarProps) {
+}: NavbarProps) {
 
-    const {user, logout} = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
-    
-    if(!user) return null;
+
+    if (!user) return null;
 
     const initials = getUserInitials(user.username);
 
-    return ( 
+    return (
         <header
             className="
             flex
@@ -65,89 +65,89 @@ export default function Navbar({
             px-6
             "
         >
-        
-        <div className="flex flex-1 items-center gap-6">
 
-            {/* Menu and search bar ...*/}
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
+            <div className="flex flex-1 items-center gap-6">
+
+                {/* Menu and search bar ...*/}
+                <TooltipProvider>
+                    <Tooltip key={sidebarCollapsed ? "expanded" : "collapsed"}>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onToggleSidebar}
+                            >
+                                <Menu className="h-5 w-5" />
+                            </Button>
+                        </TooltipTrigger>
+
+                        <TooltipContent side="bottom">
+                            {sidebarCollapsed
+                                ? "Expand Sidebar"
+                                : "Collapse Sidebar"
+                            }
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+
+            </div>
+
+
+
+            <div className="flex items-center gap-2">
+
+                {/* Theme */}
+                <ThemeToggle />
+
+                {/* Right Section */}
+
+                <DropdownMenu> {/*'DropdownMenu'-> is the parent container, it manages Open state, Close state, Positioning, Keyboard navigation, Accessibility */}
+
+                    {/* 'DropdownMenuTrigger' defines: What should open the dropdown? (in our case: button)*/}
+                    {/* asChild is used, beacuse without this Radix creates its own button, which is invalid */}
+                    <DropdownMenuTrigger asChild>
+
                         <Button
                             variant="ghost"
-                            size="icon"
-                            onClick={onToggleSidebar}
+                            className="flex items-center gap-3 px-2"
                         >
-                            <Menu className="h-5 w-5"/>
+                            <Avatar >
+                                <AvatarImage src={user?.profileImageUrl ?? undefined} />
+                                <AvatarFallback>
+                                    {initials}
+                                </AvatarFallback>
+                            </Avatar>
+
+                            <span className="font-medium">
+                                {user?.username}
+                            </span>
                         </Button>
-                    </TooltipTrigger>
 
-                    <TooltipContent side="bottom">
-                        {sidebarCollapsed
-                            ? "Expand Sidebar"
-                            : "Collapse Sidebar"
-                        }
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
+                    </DropdownMenuTrigger>
 
-        </div>
-        
-        
+                    {/* Defines the dropdown panel. */}
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onSelect={() => navigate(ROUTES.PROFILE)}>
+                            <User className="mr-2 h-4 w-4" />
+                            Profile
+                        </DropdownMenuItem>
 
-        <div className="flex items-center gap-2">
-                                
-            {/* Theme */}
-            <ThemeToggle />
+                        <DropdownMenuItem onSelect={() => navigate(ROUTES.SETTINGS)}>
+                            <Settings className='mr-2 h-4 w-4' />
+                            Settings
+                        </DropdownMenuItem>
 
-            {/* Right Section */}
-        
-            <DropdownMenu> {/*'DropdownMenu'-> is the parent container, it manages Open state, Close state, Positioning, Keyboard navigation, Accessibility */}
+                        <DropdownMenuItem
+                            className="text-red-500"
+                            onSelect={logout}
+                        >
+                            <LogOut className='mr-2 h-4 w-4' />
+                            Logout
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
 
-                {/* 'DropdownMenuTrigger' defines: What should open the dropdown? (in our case: button)*/} 
-                {/* asChild is used, beacuse without this Radix creates its own button, which is invalid */}
-                <DropdownMenuTrigger asChild>
-                    
-                    <Button
-                        variant="ghost"
-                        className="flex items-center gap-3 px-2"
-                    >
-                        <Avatar >
-                            <AvatarImage src={user?.profileImageUrl ?? undefined}/>
-                            <AvatarFallback>
-                                {initials}
-                            </AvatarFallback>
-                        </Avatar>
-
-                        <span className="font-medium">
-                            {user?.username}
-                        </span>
-                    </Button>
-
-                </DropdownMenuTrigger>
-
-                {/* Defines the dropdown panel. */}
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={() => navigate(ROUTES.PROFILE)}>
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onSelect={() => navigate(ROUTES.SETTINGS)}>
-                        <Settings className='mr-2 h-4 w-4'/>
-                        Settings
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem 
-                        className="text-red-500"
-                        onSelect={logout}
-                    >
-                        <LogOut className='mr-2 h-4 w-4'/>
-                        Logout
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-
-        </div>
+            </div>
         </header>
     );
 
