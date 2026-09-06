@@ -1,37 +1,47 @@
-import { Loader2 } from "lucide-react";
+import light_logo from "@/assets/logo-2.png";
+import dark_logo from "@/assets/journalflow_dark_logo.svg";
 
-import logo from "@/assets/logo-2.png";
+import { useTheme } from "@/contexts/ThemeContext";
 
-interface FullscreenLoaderProps {
-    message?: string;
-}
+const FullscreenLoader = () => {
+    const { resolvedTheme } =
+        useTheme();
 
-const FullscreenLoader = ({
-    message = "Preparing your journal...",
-}: FullscreenLoaderProps) => {
+    const logo =
+        resolvedTheme === "dark"
+            ? dark_logo
+            : light_logo;
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background">
-
+        <div
+            className="
+                flex
+                min-h-screen
+                flex-col
+                items-center
+                justify-center
+                gap-8
+                bg-background
+            "
+        >
             <img
                 src={logo}
                 alt="JournalFlow"
-                className="w-72 sm:w-80 md:w-96 animate-breathe select-none"
+                className="
+                    w-72
+                    select-none
+                    animate-breathe
+                    sm:w-80
+                    md:w-96
+                "
                 draggable={false}
             />
-
-            {/* <div className="flex flex-col items-center gap-3">
-
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-
-                <p className="text-sm text-muted-foreground">
-                    {message}
-                </p>
-
-            </div> */}
-
         </div>
     );
 };
 
 export default FullscreenLoader;
+
+// FullscreenLoader is intended for situations where the entire application or page cannot be used yet, 
+// such as bootstrapping authentication, restoring a session, or loading essential application state. 
+// It occupies the full viewport with your branding.
