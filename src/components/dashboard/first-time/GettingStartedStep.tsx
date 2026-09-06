@@ -20,20 +20,19 @@ export default function GettingStartedStep({
     return (
         <div
             className="
-                group
-                flex
-                min-w-0
-                flex-1
-                flex-col
-                items-center
-                text-center
-                rounded-2xl
-                p-1
-                transition-all
-                duration-300
-                hover:-translate-y-1
-                hover:bg-white/50
-            "
+        group
+        flex
+        min-w-0
+        flex-1
+        flex-col
+        items-center
+        text-center
+        rounded-2xl
+        p-1
+        transition-transform
+        duration-300
+        hover:-translate-y-1
+    "
         >
             {/* Icon */}
 
@@ -94,7 +93,7 @@ export default function GettingStartedStep({
             >
                 {description}
             </p>
-            
+
         </div>
     );
 }

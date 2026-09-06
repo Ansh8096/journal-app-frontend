@@ -1,5 +1,5 @@
 import WelcomeHero from "./WelcomeHero";
-import EmptyStateCard from "./EmptyStateCard";
+import EmptyStateCard from "../../common/EmptyStateCard";
 import WhyJournalingCard from "./WhyJournalingCard";
 import QuoteCard from "./QuoteCard";
 import { firstTimeDashboardConfig } from "./config";
@@ -15,13 +15,13 @@ export default function FirstTimeDashboard() {
                 title={firstTimeDashboardConfig.emptyState.title}
                 description={
                     <>
-                        Every great journey begins with a single step.
-                        <br />
-                        Write your first journal entry and begin your story.
+                        {firstTimeDashboardConfig.emptyState.description.line1}
+                            <br />
+                        {firstTimeDashboardConfig.emptyState.description.line2}
                     </>
                 }
-                buttonText={firstTimeDashboardConfig.emptyState.buttonText}
-                buttonLink={firstTimeDashboardConfig.emptyState.buttonLink}
+                actionLabel={firstTimeDashboardConfig.emptyState.buttonText}
+                actionLink={firstTimeDashboardConfig.emptyState.buttonLink}
                 icon={firstTimeDashboardConfig.emptyState.icon}
             />
 

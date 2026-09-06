@@ -84,9 +84,11 @@ export const firstTimeDashboardConfig = {
     emptyState: {
         title: "You don't have any journals yet",
 
-        description:
-            "Every great journey begins with a single step. Write your first journal entry and begin your story.",
-
+        description: {
+            line1: "Every great journey begins with a single step.",
+            line2: "Write your first journal entry and begin your story.",
+        },
+    
         buttonText: "Create Journal",
 
         buttonLink: "/journals/new",

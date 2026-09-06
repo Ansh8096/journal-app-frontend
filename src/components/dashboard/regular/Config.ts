@@ -29,12 +29,22 @@ export interface Motivation {
     description: string;
 }
 
+export type StatisticKey =
+    | "totalJournals"
+    | "favoriteJournals"
+    | "currentStreak";
+
+export type StatisticSource =
+    | "journal"
+    | "weather";
+
 export interface Statistic {
     title: string;
-    value: number | string;
     subtitle: string;
     icon: LucideIcon;
     iconClassName: string;
+    source: StatisticSource;
+    key?: StatisticKey;
 }
 
 export interface StatisticsSection {
@@ -44,7 +54,7 @@ export interface StatisticsSection {
 
 const iconStyles = {
     default: {
-        iconClassName: "text-muted-foreground",
+        iconClassName: "text-violet-600",
     },
 
     warning: {
@@ -98,40 +108,52 @@ export const regularDashboardConfig = {
             "Take a few moments today to capture your ideas, emotions, and experiences. Every journal entry is a step toward greater self-awareness.",
     } satisfies Motivation,
 
-    statistics: {
-        title: "Statistics",
+statistics: {
+    title: "Statistics",
 
-        items: [
-            {
-                title: "Total Journals",
-                value: 42,
-                subtitle: "Entries",
-                icon: BookOpen,
-                ...iconStyles.default,
-            },
-            {
-                title: "Favorite Journals",
-                value: 18,
-                subtitle: "Entries",
-                icon: Star,
-                ...iconStyles.warning,
-            },
-            {
-                title: "Today's Weather",
-                value: "34°C",
-                subtitle: "Chandigarh",
-                icon: Sun,
-                ...iconStyles.warning,
-            },
-            {
-                title: "Current Streak",
-                value: 12,
-                subtitle: "Days",
-                icon: Flame,
-                ...iconStyles.streak,
-            },
-        ] satisfies Statistic[],
-    } satisfies StatisticsSection,
+    items: [
+        {
+            title: "Total Journals",
+            subtitle: "Entries",
+            icon: BookOpen,
+            ...iconStyles.default,
+            source: "journal",
+            key: "totalJournals",
+        },
+        {
+            title: "Favorite Journals",
+            subtitle: "Entries",
+            icon: Star,
+            ...iconStyles.warning,
+            source: "journal",
+            key: "favoriteJournals",
+        },
+        {
+            title: "Today's Weather",
+            subtitle: "",
+            icon: Sun,
+            ...iconStyles.warning,
+            source: "weather",
+        },
+        {
+            title: "Current Streak",
+            subtitle: "Days",
+            icon: Flame,
+            ...iconStyles.streak,
+            source: "journal",
+            key: "currentStreak",
+        },
+    ] satisfies Statistic[],
+} satisfies StatisticsSection,
 } as const;
 
-export type RegularDashboardConfig = typeof regularDashboardConfig;
+export type RegularDashboardConfig =
+    typeof regularDashboardConfig;
+
+export const journalRowConfig = {
+    // path: public/images/...
+    fallback: {
+        coverImage: "/no_cover_image_dashboard.png",
+    },
+
+} as const;    

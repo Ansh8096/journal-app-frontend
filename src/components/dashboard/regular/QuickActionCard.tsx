@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import type { QuickAction } from "./Config"
+import type { QuickAction } from "./Config";
 
 interface QuickActionCardProps {
     action: QuickAction;
@@ -17,16 +17,17 @@ export default function QuickActionCard({
         <Link to={action.href}>
             <Card
                 className="
+                    group
                     h-full
                     cursor-pointer
                     transition-all
                     duration-200
-                    ease-in-out
+                    ease-out
                     hover:-translate-y-1
-                    hover:border-primary/20
+                    hover:border-violet-200
                     hover:shadow-md
                     focus-within:ring-2
-                    focus-within:ring-primary
+                    focus-within:ring-violet-400
                 "
             >
                 <CardContent
@@ -34,13 +35,35 @@ export default function QuickActionCard({
                         flex
                         flex-col
                         items-center
-                        p-6
+                        pt-3
+                        px-9
                         text-center
                     "
                 >
-                    <Icon className="mb-3 h-8 w-8 text-primary" />
+                    <Icon
+                        className="
+                            mb-3
+                            h-8
+                            w-8
+                            text-primary
+                            transition-colors
+                            duration-200
+                            ease-out
+                            group-hover:text-violet-600
+                            dark:group-hover:text-violet-400
+                        "
+                    />
 
-                    <h3 className="font-semibold">
+                    <h3
+                        className="
+                            font-semibold
+                            transition-colors
+                            duration-200
+                            ease-out
+                            group-hover:text-violet-700
+                            dark:group-hover:text-violet-400
+                        "
+                    >
                         {action.title}
                     </h3>
 
