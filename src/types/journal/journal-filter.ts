@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+
 import type { Mood } from "../common/mood";
 
 export interface JournalFiltersState {
@@ -7,8 +8,8 @@ export interface JournalFiltersState {
 }
 
 export type JournalSortOption =
-    | "createdAt,desc"
-    | "createdAt,asc"
+    | "publishedAt,desc"
+    | "publishedAt,asc"
     | "title,asc"
     | "title,desc";
 

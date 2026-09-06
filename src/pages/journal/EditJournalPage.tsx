@@ -13,9 +13,11 @@ import {
     JournalDetailsCard,
 } from "@/components/journal/create/details/JournalDetailsCard";
 
-import WeatherCard from "@/components/journal/create/weather/WeatherCard";
+import WeatherCard
+    from "@/components/journal/create/weather/WeatherCard";
 
-import WritingTipCard from "@/components/journal/create/inspiration/WritingTipCard";
+import WritingTipCard
+    from "@/components/journal/create/inspiration/WritingTipCard";
 
 import {
     getRandomWritingTip,
@@ -24,6 +26,7 @@ import {
 import {
     FormProvider,
     useForm,
+    useWatch,
 } from "react-hook-form";
 
 import {
@@ -35,7 +38,8 @@ import {
     useParams,
 } from "react-router-dom";
 
-import AppLayout from "@/layouts/app/AppLayout";
+import AppLayout
+    from "@/layouts/app/AppLayout";
 
 import {
     useJournal,
@@ -47,7 +51,8 @@ import {
     type EditJournalFormValues,
 } from "@/schemas/journal/edit-journal.schema";
 
-import EditJournalForm from "@/components/journal/edit/form/EditJournalForm";
+import EditJournalForm
+    from "@/components/journal/edit/form/EditJournalForm";
 
 import {
     Skeleton,
@@ -66,18 +71,64 @@ import {
 import {
     AlertCircle,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import type { JournalImageResponse } from "@/types/api/journal";
-import type { SelectedImage } from "@/types/journal/image";
-import { buildUpdateJournalPayload } from "@/utils/build-update-journal-payload";
-import { toast } from "sonner";
-import { getErrorMessage } from "@/lib/error";
-import { buildJournalDetailsRoute } from "@/constants/routes";
-import JournalEditLayout from "@/components/journal/edit/layout/JournalEditLayout";
-import { useWeather } from "@/hooks/weather/useWeather";
+
+import {
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+
+import type {
+    JournalImageResponse,
+} from "@/types/api/journal";
+
+import type {
+    SelectedImage,
+} from "@/types/journal/image";
+
+import {
+    buildUpdateJournalPayload,
+} from "@/utils/build-update-journal-payload";
+
+import {
+    toast,
+} from "sonner";
+
+import {
+    getErrorMessage,
+} from "@/lib/error";
+
+import {
+    buildJournalDetailsRoute,
+} from "@/constants/routes";
+
+import JournalEditLayout
+    from "@/components/journal/edit/layout/JournalEditLayout";
+
+import {
+    useWeather,
+} from "@/hooks/weather/useWeather";
+
+import {
+    useAuth,
+} from "@/hooks/useAuth";
+
+import {
+    loadEditJournalRecovery,
+    saveEditJournalRecovery,
+    clearEditJournalRecovery,
+} from "@/lib/journal/edit-journal-recovery";
+
+import {
+    isEditJournalRecoveryChanged,
+} from "@/lib/journal/isEditJournalRecoveryChanged";
 
 
 export default function EditJournalPage() {
+
+    const {
+        user,
+    } = useAuth();
 
     const {
         journalId,
@@ -85,42 +136,54 @@ export default function EditJournalPage() {
         journalId: string;
     }>();
 
+    const navigate =
+        useNavigate();
+
+
+    /*
+     * --------------------------------
+     * IMAGE STATE
+     * --------------------------------
+     */
+
     const [
         existingImages,
         setExistingImages,
-    ] = useState<JournalImageResponse[]>([]);
-
-    const navigate = useNavigate();
+    ] = useState<JournalImageResponse[]>(
+        [],
+    );
 
     const [
         newImages,
         setNewImages,
-    ] = useState<
-        SelectedImage[]
-    >([]);
-
+    ] = useState<SelectedImage[]>(
+        [],
+    );
 
     const [
         removedImagePublicIds,
         setRemovedImagePublicIds,
-    ] = useState<string[]>([]);
+    ] = useState<string[]>(
+        [],
+    );
+
+
+    /*
+     * --------------------------------
+     * DISCARD DIALOG
+     * --------------------------------
+     */
 
     const [
         isDiscardDialogOpen,
         setIsDiscardDialogOpen,
     ] = useState(false);
 
-    /**
+
+    /*
      * --------------------------------
      * FETCH JOURNAL
      * --------------------------------
-     *
-     * useJournal already handles:
-     *
-     * - React Query caching
-     * - detail query key
-     * - API request
-     * - enabled state
      */
 
     const {
@@ -132,6 +195,13 @@ export default function EditJournalPage() {
         journalId,
     );
 
+
+    /*
+     * --------------------------------
+     * WEATHER
+     * --------------------------------
+     */
+
     const {
         data: weather,
         isLoading: isWeatherLoading,
@@ -140,10 +210,24 @@ export default function EditJournalPage() {
         refetch: refetchWeather,
     } = useWeather();
 
+
+    /*
+     * --------------------------------
+     * UPDATE MUTATION
+     * --------------------------------
+     */
+
     const {
         mutate: updateJournal,
         isPending: isUpdatePending,
     } = useUpdateJournal();
+
+
+    /*
+     * --------------------------------
+     * REACT HOOK FORM
+     * --------------------------------
+     */
 
     const form =
         useForm<EditJournalFormValues>({
@@ -155,24 +239,56 @@ export default function EditJournalPage() {
             defaultValues: {
                 title: "",
                 content: "",
-                mood: null,
                 tags: [],
             },
 
             mode: "onBlur",
         });
 
+
+    /*
+     * --------------------------------
+     * WATCH FORM VALUES
+     * --------------------------------
+     *
+     * Used specifically for local
+     * edit-journal recovery.
+     */
+
+    const watchedValues =
+        useWatch<
+            EditJournalFormValues
+        >({
+            control: form.control,
+        });
+
+
+    /*
+     * --------------------------------
+     * NEW IMAGE REF
+     * --------------------------------
+     */
+
     const newImagesRef =
-        useRef<
-            SelectedImage[]
-        >([]);
+        useRef<SelectedImage[]>(
+            [],
+        );
 
     useEffect(() => {
 
         newImagesRef.current =
             newImages;
 
-    }, [newImages]);
+    }, [
+        newImages,
+    ]);
+
+
+    /*
+     * --------------------------------
+     * CLEANUP IMAGE PREVIEWS
+     * --------------------------------
+     */
 
     useEffect(() => {
 
@@ -187,35 +303,184 @@ export default function EditJournalPage() {
 
                 },
             );
-
         };
 
     }, []);
 
-    const initializedJournalIdRef = useRef<string | null>(null);
+
+    /*
+     * --------------------------------
+     * RECOVERY STATE
+     * --------------------------------
+     */
+
+    const initializedJournalKeyRef =
+        useRef<string | null>(
+            null,
+        );
+
+    const originalValuesRef =
+        useRef<
+            EditJournalFormValues | null
+        >(
+            null,
+        );
+
+
+    /*
+     * --------------------------------
+     * DETERMINE RECOVERY CHANGES
+     * --------------------------------
+     *
+     * Compare the current form state
+     * against the last server-saved
+     * journal state.
+     */
+
+    const hasRecoveryChanges =
+        isEditJournalRecoveryChanged(
+            watchedValues,
+            originalValuesRef.current,
+        );
+
+
+    /*
+     * --------------------------------
+     * INITIALIZE JOURNAL + RECOVERY
+     * --------------------------------
+     */
 
     useEffect(() => {
 
-        if (!journal) {
-            return;
-        }
-
+        /*
+         * We cannot initialize the edit
+         * state until both the authenticated
+         * user and server journal exist.
+         */
         if (
-            initializedJournalIdRef.current ===
-            journal.id
+            !user?.id ||
+            !journal
         ) {
             return;
         }
 
-        initializedJournalIdRef.current =
-            journal.id;
 
-        form.reset({
-            title: journal.title,
-            content: journal.content,
-            mood: journal.mood,
-            tags: journal.tags,
-        });
+        /*
+         * Recovery belongs to a specific
+         * user + journal combination.
+         */
+        const journalKey =
+            `${user.id}:${journal.id}`;
+
+
+        /*
+         * Prevent repeated initialization
+         * for the same journal.
+         */
+        if (
+            initializedJournalKeyRef.current ===
+            journalKey
+        ) {
+            return;
+        }
+
+
+        initializedJournalKeyRef.current =
+            journalKey;
+
+
+        /*
+         * --------------------------------
+         * SERVER JOURNAL = BASELINE
+         * --------------------------------
+         *
+         * This must always represent the
+         * last server-saved state.
+         *
+         * NEVER replace this with recovery.
+         */
+
+        const originalValues:
+            EditJournalFormValues = {
+
+            title:
+                journal.title,
+
+            content:
+                journal.content,
+
+            mood:
+                journal.mood,
+
+            tags:
+                journal.tags ?? [],
+        };
+
+
+        originalValuesRef.current =
+            originalValues;
+
+
+        /*
+         * --------------------------------
+         * LOAD LOCAL RECOVERY
+         * --------------------------------
+         */
+
+        const recoveredData =
+            loadEditJournalRecovery(
+                user.id,
+                journal.id,
+            );
+
+
+        /*
+         * --------------------------------
+         * INITIAL FORM VALUES
+         * --------------------------------
+         *
+         * Recovery wins when available.
+         *
+         * The recovery schema allows
+         * mood = null, while the actual
+         * form schema requires a mood.
+         *
+         * Therefore null is normalized to
+         * undefined for the form.
+         */
+
+        const initialFormValues =
+            recoveredData
+                ? {
+                    title:
+                        recoveredData.title,
+
+                    content:
+                        recoveredData.content,
+
+                    mood:
+                        recoveredData.mood ??
+                        undefined,
+
+                    tags:
+                        recoveredData.tags,
+                }
+                : originalValues;
+
+
+        form.reset(
+            initialFormValues,
+        );
+
+
+        /*
+         * --------------------------------
+         * SERVER IMAGE STATE
+         * --------------------------------
+         *
+         * Images are intentionally NOT
+         * part of Phase A recovery.
+         */
 
         setExistingImages(
             journal.images ?? [],
@@ -225,13 +490,154 @@ export default function EditJournalPage() {
 
         setNewImages([]);
 
-    }, [journal, form]);
 
+        /*
+         * --------------------------------
+         * RECOVERY FEEDBACK
+         * --------------------------------
+         */
+
+        if (recoveredData) {
+
+            toast.info(
+                "Unsaved changes restored",
+                {
+                    description:
+                        "Your previous changes to this journal have been restored.",
+                },
+            );
+        }
+
+    }, [
+        user?.id,
+        journal,
+        form,
+    ]);
+
+
+    /*
+     * --------------------------------
+     * AUTOSAVE EDIT RECOVERY
+     * --------------------------------
+     *
+     * IMPORTANT:
+     *
+     * We do NOT use isRichTextEmpty()
+     * here.
+     *
+     * An empty editor may itself be an
+     * intentional unsaved change.
+     */
+
+    useEffect(() => {
+
+        /*
+         * Wait until all required identity
+         * and baseline information exists.
+         */
+        if (
+            !user?.id ||
+            !journalId ||
+            !originalValuesRef.current
+        ) {
+            return;
+        }
+
+
+        /*
+         * Current form matches the server
+         * baseline.
+         *
+         * There is nothing to recover.
+         */
+        if (!hasRecoveryChanges) {
+
+            clearEditJournalRecovery();
+
+            return;
+        }
+
+
+        /*
+         * Debounce writes.
+         *
+         * We don't want localStorage to be
+         * updated for every single keystroke.
+         */
+        const timeoutId =
+            window.setTimeout(
+                () => {
+
+                    saveEditJournalRecovery(
+                        user.id,
+                        journalId,
+                        {
+                            title:
+                                watchedValues.title ??
+                                "",
+
+                            content:
+                                watchedValues.content ??
+                                "",
+
+                            /*
+                             * Recovery storage allows
+                             * null, while useWatch()
+                             * may produce undefined.
+                             */
+                            mood:
+                                watchedValues.mood ??
+                                null,
+
+                            tags:
+                                watchedValues.tags ??
+                                [],
+                        },
+                    );
+
+                },
+                500,
+            );
+
+
+        return () => {
+
+            window.clearTimeout(
+                timeoutId,
+            );
+
+        };
+
+    }, [
+        user?.id,
+        journalId,
+        watchedValues.title,
+        watchedValues.content,
+        watchedValues.mood,
+        watchedValues.tags,
+        hasRecoveryChanges,
+    ]);
+
+
+    /*
+     * --------------------------------
+     * JOURNAL DATE
+     * --------------------------------
+     */
 
     const journalDate =
         journal
-            ? new Date(journal.createdAt)
+            ? new Date(
+                journal.publishedAt,
+            )
             : new Date();
+
+
+    /*
+     * --------------------------------
+     * WRITING TIP
+     * --------------------------------
+     */
 
     const [tip] =
         useState(
@@ -239,11 +645,25 @@ export default function EditJournalPage() {
                 getRandomWritingTip(),
         );
 
+
+    /*
+     * --------------------------------
+     * FORM VALUES FOR SIDEBAR
+     * --------------------------------
+     */
+
     const mood =
         form.watch("mood");
 
     const tags =
         form.watch("tags");
+
+
+    /*
+     * --------------------------------
+     * VALIDATION ERRORS
+     * --------------------------------
+     */
 
     const moodError =
         form.formState.errors
@@ -253,33 +673,50 @@ export default function EditJournalPage() {
         form.formState.errors
             .tags?.message;
 
+
+    /*
+     * --------------------------------
+     * UNSAVED CHANGES
+     * --------------------------------
+     *
+     * This is intentionally separate
+     * from hasRecoveryChanges.
+     *
+     * hasUnsavedChanges controls the
+     * Save/Discard UI.
+     *
+     * hasRecoveryChanges controls
+     * local recovery persistence.
+     */
+
     const hasUnsavedChanges =
         form.formState.isDirty ||
+        hasRecoveryChanges ||
         newImages.length > 0 ||
         removedImagePublicIds.length > 0;
 
+
+    /*
+     * --------------------------------
+     * UPDATE JOURNAL
+     * --------------------------------
+     */
 
     const handleUpdate = (
         values: EditJournalFormValues,
     ) => {
 
-        /**
-         * --------------------------------
-         * PREVENT DUPLICATE SUBMISSIONS
-         * --------------------------------
+        /*
+         * Prevent duplicate submissions.
          */
-
         if (isUpdatePending) {
             return;
         }
 
 
-        /**
-         * --------------------------------
-         * JOURNAL ID
-         * --------------------------------
+        /*
+         * Journal ID is required.
          */
-
         if (!journalId) {
 
             toast.error(
@@ -293,18 +730,17 @@ export default function EditJournalPage() {
             return;
         }
 
-        /**
-         * --------------------------------
-         * BUILD UPDATE PAYLOAD
-         * --------------------------------
-         */
 
+        /*
+         * Build API payload.
+         */
         const payload =
             buildUpdateJournalPayload(
                 values,
                 newImages,
                 removedImagePublicIds,
             );
+
 
         updateJournal(
             {
@@ -322,13 +758,23 @@ export default function EditJournalPage() {
                     updatedJournal,
                 ) => {
 
-                    /**
-                     * Release all temporary
-                     * local preview URLs.
+                    /*
+                     * --------------------------------
+                     * CLEAR LOCAL RECOVERY
+                     * --------------------------------
                      *
-                     * Existing server images
-                     * don't have object URLs.
+                     * The server now contains the
+                     * user's changes.
                      */
+                    clearEditJournalRecovery();
+
+
+                    /*
+                     * --------------------------------
+                     * RELEASE IMAGE PREVIEWS
+                     * --------------------------------
+                     */
+
                     newImages.forEach(
                         (image) => {
 
@@ -340,32 +786,34 @@ export default function EditJournalPage() {
                     );
 
 
-                    /**
-                     * Clear temporary image state.
+                    /*
+                     * --------------------------------
+                     * CLEAR TEMPORARY IMAGE STATE
+                     * --------------------------------
                      */
+
                     setNewImages([]);
 
-
-                    setRemovedImagePublicIds(
-                        [],
-                    );
+                    setRemovedImagePublicIds([]);
 
 
-                    /**
-                     * Optional local cleanup.
-                     *
-                     * We are leaving the page,
-                     * so keeping these values is
-                     * unnecessary.
+                    /*
+                     * --------------------------------
+                     * UPDATE LOCAL SERVER IMAGE STATE
+                     * --------------------------------
                      */
+
                     setExistingImages(
                         updatedJournal.images ?? [],
                     );
 
 
-                    /**
-                     * Success feedback.
+                    /*
+                     * --------------------------------
+                     * SUCCESS FEEDBACK
+                     * --------------------------------
                      */
+
                     toast.success(
                         "Journal updated",
                         {
@@ -375,10 +823,12 @@ export default function EditJournalPage() {
                     );
 
 
-                    /**
-                     * Navigate to the updated
-                     * journal details page.
+                    /*
+                     * --------------------------------
+                     * NAVIGATE TO DETAILS
+                     * --------------------------------
                      */
+
                     navigate(
                         buildJournalDetailsRoute(
                             updatedJournal.id,
@@ -403,7 +853,7 @@ export default function EditJournalPage() {
                         },
                     );
 
-                    /**
+                    /*
                      * IMPORTANT:
                      *
                      * Do NOT:
@@ -413,13 +863,19 @@ export default function EditJournalPage() {
                      * - clear removedImagePublicIds
                      *
                      * The user should be able
-                     * to correct the problem
-                     * and retry.
+                     * to correct the problem and retry.
                      */
                 },
             },
         );
     };
+
+
+    /*
+     * --------------------------------
+     * MOOD CHANGE
+     * --------------------------------
+     */
 
     const handleMoodChange = (
         value: NonNullable<
@@ -438,6 +894,13 @@ export default function EditJournalPage() {
         );
     };
 
+
+    /*
+     * --------------------------------
+     * TAG CHANGE
+     * --------------------------------
+     */
+
     const handleTagsChange = (
         value: string[],
     ) => {
@@ -452,6 +915,13 @@ export default function EditJournalPage() {
             },
         );
     };
+
+
+    /*
+     * --------------------------------
+     * REMOVE EXISTING IMAGE
+     * --------------------------------
+     */
 
     const handleRemoveExistingImage = (
         publicId: string,
@@ -485,6 +955,13 @@ export default function EditJournalPage() {
         );
     };
 
+
+    /*
+     * --------------------------------
+     * DISCARD REQUEST
+     * --------------------------------
+     */
+
     const handleDiscardRequest = () => {
 
         if (isUpdatePending) {
@@ -495,29 +972,31 @@ export default function EditJournalPage() {
             return;
         }
 
-        setIsDiscardDialogOpen(true);
+        setIsDiscardDialogOpen(
+            true,
+        );
     };
+
+
+    /*
+     * --------------------------------
+     * CONFIRM DISCARD
+     * --------------------------------
+     */
 
     const handleConfirmDiscard = () => {
 
-        /**
-         * Prevent discard while an update
-         * request is running.
-         */
         if (isUpdatePending) {
             return;
         }
 
 
-        /**
+        /*
          * --------------------------------
-         * REVOKE NEW IMAGE PREVIEW URLS
+         * REVOKE NEW IMAGE PREVIEWS
          * --------------------------------
-         *
-         * Existing server images do not have
-         * object URLs and therefore do not
-         * need revocation.
          */
+
         newImages.forEach(
             (image) => {
 
@@ -529,68 +1008,96 @@ export default function EditJournalPage() {
         );
 
 
-        /**
+        /*
          * --------------------------------
-         * CLEAR NEW IMAGE STATE
+         * CLEAR NEW IMAGES
          * --------------------------------
          */
+
         setNewImages([]);
 
 
-        /**
+        /*
          * --------------------------------
-         * RESTORE ORIGINAL SERVER IMAGES
+         * RESTORE SERVER IMAGES
          * --------------------------------
-         *
-         * journal is the originally fetched
-         * server state.
          */
+
         setExistingImages(
             journal?.images ?? [],
         );
 
 
-        /**
+        /*
          * --------------------------------
-         * CLEAR PENDING IMAGE REMOVALS
+         * CLEAR IMAGE REMOVALS
          * --------------------------------
          */
+
         setRemovedImagePublicIds([]);
 
 
-        /**
+        /*
          * --------------------------------
-         * RESET RHF
+         * CLEAR LOCAL RECOVERY
          * --------------------------------
-         *
-         * Because E.4 used:
-         *
-         * form.reset({
-         *     title,
-         *     content,
-         *     mood,
-         *     tags,
-         * });
-         *
-         * those values are now RHF's
-         * current defaults.
          */
-        form.reset();
+
+        clearEditJournalRecovery();
 
 
-        /**
+        /*
+         * --------------------------------
+         * RESTORE SERVER FORM VALUES
+         * --------------------------------
+         *
+         * IMPORTANT:
+         *
+         * Do NOT use form.reset() alone.
+         *
+         * After recovery is loaded,
+         * recovery values may have become
+         * RHF's current defaults.
+         *
+         * Discard must return to the
+         * SERVER-SAVED values.
+         */
+
+        form.reset(
+            originalValuesRef.current ??
+            {
+                title:
+                    journal?.title ?? "",
+
+                content:
+                    journal?.content ?? "",
+
+                mood:
+                    journal?.mood,
+
+                tags:
+                    journal?.tags ?? [],
+            },
+        );
+
+
+        /*
          * --------------------------------
          * CLOSE DIALOG
          * --------------------------------
          */
-        setIsDiscardDialogOpen(false);
+
+        setIsDiscardDialogOpen(
+            false,
+        );
 
 
-        /**
+        /*
          * --------------------------------
-         * FEEDBACK
+         * SUCCESS FEEDBACK
          * --------------------------------
          */
+
         toast.success(
             "Changes discarded",
             {
@@ -599,6 +1106,13 @@ export default function EditJournalPage() {
             },
         );
     };
+
+
+    /*
+     * --------------------------------
+     * REPLACE EXISTING IMAGE
+     * --------------------------------
+     */
 
     const handleReplaceExistingImage = (
         publicId: string,
@@ -609,7 +1123,8 @@ export default function EditJournalPage() {
             (previous) =>
                 previous.filter(
                     (image) =>
-                        image.publicId !== publicId,
+                        image.publicId !==
+                        publicId,
                 ),
         );
 
@@ -617,7 +1132,9 @@ export default function EditJournalPage() {
             (previous) => {
 
                 if (
-                    previous.includes(publicId)
+                    previous.includes(
+                        publicId,
+                    )
                 ) {
                     return previous;
                 }
@@ -637,14 +1154,24 @@ export default function EditJournalPage() {
         );
     };
 
-    const handleRefreshWeather = async () => {
-        await refetchWeather();
-    };
 
-    /**
+    /*
      * --------------------------------
+     * REFRESH WEATHER
+     * --------------------------------
+     */
+
+    const handleRefreshWeather =
+        async () => {
+
+            await refetchWeather();
+        };
+
+
+    /*
+     * ============================================================
      * INVALID JOURNAL ID
-     * --------------------------------
+     * ============================================================
      */
 
     if (!journalId) {
@@ -652,11 +1179,22 @@ export default function EditJournalPage() {
         return (
             <AppLayout>
 
-                <div className="flex min-h-[60vh] items-center justify-center px-4">
+                <div
+                    className="
+                        flex
+                        min-h-[60vh]
+                        items-center
+                        justify-center
+                        px-4
+                    "
+                >
+                    <Alert
+                        className="max-w-lg"
+                    >
 
-                    <Alert className="max-w-lg">
-
-                        <AlertCircle className="h-4 w-4" />
+                        <AlertCircle
+                            className="h-4 w-4"
+                        />
 
                         <AlertTitle>
                             Journal not found
@@ -668,7 +1206,6 @@ export default function EditJournalPage() {
                         </AlertDescription>
 
                     </Alert>
-
                 </div>
 
             </AppLayout>
@@ -676,10 +1213,10 @@ export default function EditJournalPage() {
     }
 
 
-    /**
-     * --------------------------------
+    /*
+     * ============================================================
      * LOADING STATE
-     * --------------------------------
+     * ============================================================
      */
 
     if (isLoading) {
@@ -693,52 +1230,77 @@ export default function EditJournalPage() {
                     aria-live="polite"
                 >
 
-                    {/* Page header */}
-
                     <section className="space-y-3">
 
-                        <Skeleton className="h-9 w-56" />
+                        <Skeleton
+                            className="h-9 w-56"
+                        />
 
-                        <Skeleton className="h-5 w-80" />
+                        <Skeleton
+                            className="h-5 w-80"
+                        />
 
                     </section>
 
 
-                    {/* Main layout */}
+                    <section
+                        className="
+                            grid
+                            gap-8
+                            xl:grid-cols-12
+                        "
+                    >
 
-                    <section className="grid gap-8 xl:grid-cols-12">
+                        <main
+                            className="
+                                space-y-8
+                                xl:col-span-8
+                            "
+                        >
 
-                        <main className="space-y-8 xl:col-span-8">
-
-                            {/* Title */}
-
-                            <Skeleton className="h-11 w-full" />
-
-
-                            {/* Editor */}
+                            <Skeleton
+                                className="h-11 w-full"
+                            />
 
                             <div className="space-y-3">
 
-                                <Skeleton className="h-10 w-full" />
+                                <Skeleton
+                                    className="h-10 w-full"
+                                />
 
-                                <Skeleton className="h-72 w-full" />
+                                <Skeleton
+                                    className="h-72 w-full"
+                                />
 
                             </div>
 
 
-                            {/* Images */}
-
                             <div className="space-y-3">
 
-                                <Skeleton className="h-6 w-32" />
+                                <Skeleton
+                                    className="h-6 w-32"
+                                />
 
-                                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                                <div
+                                    className="
+                                        grid
+                                        grid-cols-2
+                                        gap-4
+                                        sm:grid-cols-3
+                                    "
+                                >
 
-                                    <Skeleton className="aspect-square w-full" />
+                                    <Skeleton
+                                        className="aspect-square w-full"
+                                    />
 
-                                    <Skeleton className="aspect-square w-full" />
+                                    <Skeleton
+                                        className="aspect-square w-full"
+                                    />
 
-                                    <Skeleton className="aspect-square w-full" />
+                                    <Skeleton
+                                        className="aspect-square w-full"
+                                    />
 
                                 </div>
 
@@ -747,9 +1309,16 @@ export default function EditJournalPage() {
                         </main>
 
 
-                        <aside className="space-y-6 xl:col-span-4">
+                        <aside
+                            className="
+                                space-y-6
+                                xl:col-span-4
+                            "
+                        >
 
-                            <Skeleton className="h-64 w-full" />
+                            <Skeleton
+                                className="h-64 w-full"
+                            />
 
                         </aside>
 
@@ -762,10 +1331,10 @@ export default function EditJournalPage() {
     }
 
 
-    /**
-     * --------------------------------
+    /*
+     * ============================================================
      * ERROR STATE
-     * --------------------------------
+     * ============================================================
      */
 
     if (isError) {
@@ -773,26 +1342,37 @@ export default function EditJournalPage() {
         return (
             <AppLayout>
 
-                <div className="flex min-h-[60vh] items-center justify-center px-4">
+                <div
+                    className="
+                        flex
+                        min-h-[60vh]
+                        items-center
+                        justify-center
+                        px-4
+                    "
+                >
 
                     <Alert
                         variant="destructive"
                         className="max-w-lg"
                     >
 
-                        <AlertCircle className="h-4 w-4" />
+                        <AlertCircle
+                            className="h-4 w-4"
+                        />
 
                         <AlertTitle>
                             Failed to load journal
                         </AlertTitle>
 
-                        <AlertDescription className="mt-2 space-y-4">
+                        <AlertDescription
+                            className="mt-2 space-y-4"
+                        >
 
                             <p>
                                 We couldn't load this journal.
                                 Please try again.
                             </p>
-
 
                             <Button
                                 type="button"
@@ -815,13 +1395,10 @@ export default function EditJournalPage() {
     }
 
 
-    /**
-     * --------------------------------
+    /*
+     * ============================================================
      * NOT FOUND / NO DATA
-     * --------------------------------
-     *
-     * React Query succeeded but no
-     * journal data was returned.
+     * ============================================================
      */
 
     if (!journal) {
@@ -829,11 +1406,23 @@ export default function EditJournalPage() {
         return (
             <AppLayout>
 
-                <div className="flex min-h-[60vh] items-center justify-center px-4">
+                <div
+                    className="
+                        flex
+                        min-h-[60vh]
+                        items-center
+                        justify-center
+                        px-4
+                    "
+                >
 
-                    <Alert className="max-w-lg">
+                    <Alert
+                        className="max-w-lg"
+                    >
 
-                        <AlertCircle className="h-4 w-4" />
+                        <AlertCircle
+                            className="h-4 w-4"
+                        />
 
                         <AlertTitle>
                             Journal not found
@@ -852,222 +1441,233 @@ export default function EditJournalPage() {
         );
     }
 
+
+    /*
+     * ============================================================
+     * MAIN EDIT PAGE
+     * ============================================================
+     */
+
     return (
-    <AppLayout>
+        <AppLayout>
 
-        <FormProvider {...form}>
-
-            <JournalEditLayout
-                title="Edit Journal"
-                description="Update your journal and save your changes."
-                sidebar={
-
-                    <>
-                        {/* ------------------------------------------------
-                            JOURNAL DETAILS
-                        ------------------------------------------------- */}
-
-                        <JournalDetailsCard
-                            date={
-                                journalDate
-                            }
-
-                            mood={
-                                mood ?? null
-                            }
-
-                            tags={
-                                tags
-                            }
-
-                            onMoodChange={
-                                handleMoodChange
-                            }
-
-                            onTagsChange={
-                                handleTagsChange
-                            }
-
-                            moodError={
-                                moodError
-                            }
-
-                            tagsError={
-                                tagsError
-                            }
-
-                            disabled={
-                                isUpdatePending
-                            }
-
-                            onDateClick={() => {
-                                console.log(
-                                    "Open date picker",
-                                );
-                            }}
-
-                            onTimeClick={() => {
-                                console.log(
-                                    "Open time picker",
-                                );
-                            }}
-                        />
-
-
-                        {/* ------------------------------------------------
-                            WEATHER
-                        ------------------------------------------------- */}
-
-                        <WeatherCard
-                            weather={
-                                weather
-                            }
-
-                            loading={
-                                isWeatherLoading ||
-                                isWeatherFetching
-                            }
-
-                            error={
-                                isWeatherError
-                            }
-
-                            disabled={
-                                isUpdatePending
-                            }
-
-                            onRefresh={handleRefreshWeather}
-                        />
-
-
-                        {/* ------------------------------------------------
-                            WRITING TIP
-                        ------------------------------------------------- */}
-
-                        <WritingTipCard
-                            tip={
-                                tip
-                            }
-                        />
-                    </>
-                }
+            <FormProvider
+                {...form}
             >
 
-                <EditJournalForm
-                    existingImages={
-                        existingImages
+                <JournalEditLayout
+                    title="Edit Journal"
+                    description="Update your journal and save your changes."
+                    sidebar={
+                        <>
+                            {/* --------------------------------
+                                JOURNAL DETAILS
+                            --------------------------------- */}
+
+                            <JournalDetailsCard
+                                date={
+                                    journalDate
+                                }
+
+                                mood={
+                                    mood ?? null
+                                }
+
+                                tags={
+                                    tags
+                                }
+
+                                onMoodChange={
+                                    handleMoodChange
+                                }
+
+                                onTagsChange={
+                                    handleTagsChange
+                                }
+
+                                moodError={
+                                    moodError
+                                }
+
+                                tagsError={
+                                    tagsError
+                                }
+
+                                disabled={
+                                    isUpdatePending
+                                }
+
+                                onDateClick={() => {
+                                    console.log(
+                                        "Open date picker",
+                                    );
+                                }}
+
+                                onTimeClick={() => {
+                                    console.log(
+                                        "Open time picker",
+                                    );
+                                }}
+                            />
+
+
+                            {/* --------------------------------
+                                WEATHER
+                            --------------------------------- */}
+
+                            <WeatherCard
+                                weather={
+                                    weather
+                                }
+
+                                loading={
+                                    isWeatherLoading ||
+                                    isWeatherFetching
+                                }
+
+                                error={
+                                    isWeatherError
+                                }
+
+                                disabled={
+                                    isUpdatePending
+                                }
+
+                                onRefresh={
+                                    handleRefreshWeather
+                                }
+                            />
+
+
+                            {/* --------------------------------
+                                WRITING TIP
+                            --------------------------------- */}
+
+                            <WritingTipCard
+                                tip={
+                                    tip
+                                }
+                            />
+
+                        </>
                     }
+                >
 
-                    newImages={
-                        newImages
-                    }
-
-                    onNewImagesChange={
-                        setNewImages
-                    }
-
-                    onRemoveExistingImage={
-                        handleRemoveExistingImage
-                    }
-
-                    onReplaceExistingImage={
-                        handleReplaceExistingImage
-                    }
-
-                    onSubmit={
-                        handleUpdate
-                    }
-
-                    isUpdating={
-                        isUpdatePending
-                    }
-
-                    onDiscardRequest={
-                        handleDiscardRequest
-                    }
-
-                    hasUnsavedChanges={
-                        hasUnsavedChanges
-                    }
-                />
-
-            </JournalEditLayout>
-
-
-            {/* ------------------------------------------------------------
-                DISCARD CONFIRMATION
-            ------------------------------------------------------------- */}
-
-            <AlertDialog
-                open={
-                    isDiscardDialogOpen
-                }
-
-                onOpenChange={
-                    (open) => {
-
-                        if (
-                            isUpdatePending
-                        ) {
-                            return;
+                    <EditJournalForm
+                        existingImages={
+                            existingImages
                         }
 
-                        setIsDiscardDialogOpen(
-                            open,
-                        );
+                        newImages={
+                            newImages
+                        }
+
+                        onNewImagesChange={
+                            setNewImages
+                        }
+
+                        onRemoveExistingImage={
+                            handleRemoveExistingImage
+                        }
+
+                        onReplaceExistingImage={
+                            handleReplaceExistingImage
+                        }
+
+                        onSubmit={
+                            handleUpdate
+                        }
+
+                        isUpdating={
+                            isUpdatePending
+                        }
+
+                        onDiscardRequest={
+                            handleDiscardRequest
+                        }
+
+                        hasUnsavedChanges={
+                            hasUnsavedChanges
+                        }
+                    />
+
+                </JournalEditLayout>
+
+
+                {/* --------------------------------------------
+                    DISCARD CONFIRMATION
+                --------------------------------------------- */}
+
+                <AlertDialog
+                    open={
+                        isDiscardDialogOpen
                     }
-                }
-            >
 
-                <AlertDialogContent>
+                    onOpenChange={
+                        (open) => {
 
-                    <AlertDialogHeader>
-
-                        <AlertDialogTitle>
-                            Discard changes?
-                        </AlertDialogTitle>
-
-                        <AlertDialogDescription>
-                            All unsaved changes to this
-                            journal, including newly added
-                            images and image removals, will
-                            be discarded.
-                        </AlertDialogDescription>
-
-                    </AlertDialogHeader>
-
-
-                    <AlertDialogFooter>
-
-                        <AlertDialogCancel
-                            disabled={
+                            if (
                                 isUpdatePending
-                            }
-                        >
-                            Cancel
-                        </AlertDialogCancel>
-
-
-                        <AlertDialogAction
-                            onClick={
-                                handleConfirmDiscard
+                            ) {
+                                return;
                             }
 
-                            disabled={
-                                isUpdatePending
-                            }
-                        >
-                            Discard Changes
-                        </AlertDialogAction>
+                            setIsDiscardDialogOpen(
+                                open,
+                            );
+                        }
+                    }
+                >
 
-                    </AlertDialogFooter>
+                    <AlertDialogContent>
 
-                </AlertDialogContent>
+                        <AlertDialogHeader>
 
-            </AlertDialog>
+                            <AlertDialogTitle>
+                                Discard changes?
+                            </AlertDialogTitle>
 
-        </FormProvider>
+                            <AlertDialogDescription>
+                                All unsaved changes to this
+                                journal, including newly added
+                                images and image removals, will
+                                be discarded.
+                            </AlertDialogDescription>
 
-    </AppLayout>
-);
+                        </AlertDialogHeader>
+
+
+                        <AlertDialogFooter>
+
+                            <AlertDialogCancel
+                                disabled={
+                                    isUpdatePending
+                                }
+                            >
+                                Cancel
+                            </AlertDialogCancel>
+
+
+                            <AlertDialogAction
+                                onClick={
+                                    handleConfirmDiscard
+                                }
+
+                                disabled={
+                                    isUpdatePending
+                                }
+                            >
+                                Discard Changes
+                            </AlertDialogAction>
+
+                        </AlertDialogFooter>
+
+                    </AlertDialogContent>
+
+                </AlertDialog>
+
+            </FormProvider>
+
+        </AppLayout>
+    );
 }

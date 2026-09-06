@@ -231,7 +231,17 @@ function ImageLightbox({
                         <ChevronRight className="h-5 w-5" />
                     </Button>
 
-                    <div className="absolute right-4 top-4 flex items-center gap-2">
+                    <div
+                        className="
+                            absolute
+                            right-4
+                            top-4
+                            z-10
+                            flex
+                            items-center
+                            gap-2
+                        "
+                    >
                         {/*
                             Switched from variant="destructive" (which
                             bakes in a solid, fully-saturated red fill via
@@ -245,35 +255,48 @@ function ImageLightbox({
                             border/icon color, just not shouting it.
                         */}
                         <Button
-                            size="icon"
-                            variant="ghost"
-                            aria-label="Delete image"
-                            disabled={deleteLoading}
-                            onClick={onDelete}
-                            className="
-                                border
-                                border-red-400/30
-                                bg-white/5
-                                text-red-400
-                                backdrop-blur-md
-                                transition-all
-                                duration-200
-                                hover:scale-105
-                                hover:border-red-400/50
-                                hover:bg-red-500/15
-                                hover:text-red-300
-                                focus-visible:ring-2
-                                focus-visible:ring-red-400/50
-                                focus-visible:ring-offset-0
-                                active:scale-95
-                            "
-                        >
-                            {deleteLoading ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Trash2 className="h-4 w-4" />
-                            )}
-                        </Button>
+    size="icon"
+    variant="ghost"
+    aria-label="Delete image"
+    disabled={deleteLoading}
+    onClick={onDelete}
+    className="
+        size-9
+        rounded-full
+        border
+        border-red-400/30
+        bg-white/10
+        text-red-400
+        backdrop-blur-xl
+        transition-all
+        duration-200
+        hover:scale-105
+        hover:border-red-400/50
+        hover:bg-red-500/15
+        hover:text-red-300
+        focus-visible:ring-2
+        focus-visible:ring-red-400/50
+        focus-visible:ring-offset-0
+        active:scale-95
+    "
+>
+    {deleteLoading ? (
+        <Loader2
+            className="
+                h-4
+                w-4
+                animate-spin
+            "
+        />
+    ) : (
+        <Trash2
+            className="
+                h-4
+                w-4
+            "
+        />
+    )}
+</Button>
 
                         {/*
                             shadow-none (forced) added — the shadow wasn't
@@ -283,30 +306,38 @@ function ImageLightbox({
                             itself, so simply not adding a shadow class
                             wasn't enough to remove it.
                         */}
-                        <Button
-                            size="icon"
-                            variant="secondary"
-                            aria-label="Close preview"
-                            onClick={() => onOpenChange(false)}
-                            className="
-                                !shadow-none
-                                border
-                                border-white/10
-                                bg-black/50
-                                text-white
-                                backdrop-blur-md
-                                transition-all
-                                duration-200
-                                hover:scale-[1.03]
-                                hover:bg-black/70
-                                focus-visible:ring-2
-                                focus-visible:ring-white/50
-                                focus-visible:ring-offset-0
-                                active:scale-95
-                            "
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
+<Button
+    size="icon"
+    variant="ghost"
+    aria-label="Close preview"
+    onClick={() => onOpenChange(false)}
+    className="
+        size-9
+        rounded-full
+        border
+        border-white/15
+        bg-white/10
+        text-white
+        backdrop-blur-xl
+        transition-all
+        duration-200
+        hover:scale-105
+        hover:border-white/25
+        hover:bg-white/20
+        focus-visible:ring-2
+        focus-visible:ring-white/60
+        focus-visible:ring-offset-0
+        active:scale-95
+    "
+>
+    <X
+        className="
+            h-4
+            w-4
+            stroke-[2.25]
+        "
+    />
+</Button>
                     </div>
                 </div>
             </DialogContent>

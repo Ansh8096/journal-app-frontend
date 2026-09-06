@@ -7,6 +7,7 @@ import {
 import {
     FormProvider,
     useForm,
+    useWatch,
 } from "react-hook-form";
 
 import {
@@ -94,10 +95,15 @@ import { isDraftEmpty } from "@/lib/validation/isDraftEmpty";
 import { getErrorMessage } from "@/lib/error";
 import { buildJournalDetailsRoute } from "@/constants/routes";
 import { useWeather } from "@/hooks/weather/useWeather";
+import { publishDraftSchema, type PublishDraftFormValues } from "@/schemas/journal/publish-draft.schema";
+import { useAuth } from "@/hooks/useAuth";
+import { clearEditDraftRecovery, loadEditDraftRecovery, saveEditDraftRecovery } from "@/lib/journal/edit-draft-recovery";
+import { isEditDraftRecoveryChanged } from "@/lib/journal/isEditDraftRecoveryChanged";
 
 
 export default function EditDraftPage() {
 
+    const { user } = useAuth();
 
     const navigate =
         useNavigate();
@@ -165,6 +171,14 @@ export default function EditDraftPage() {
             mode: "onBlur",
         });
 
+    const watchedValues =
+        useWatch<
+            EditDraftFormValues
+        >({
+            control: form.control,
+        });
+
+
 
     /* ---------------------------------------------------------------------- */
     /*                              IMAGE STATE                               */
@@ -225,7 +239,7 @@ export default function EditDraftPage() {
      * from resetting the user's unsaved
      * changes.
      */
-    const initializedDraftIdRef =
+    const initializedDraftKeyRef =
         useRef<string | null>(
             null,
         );
@@ -252,6 +266,11 @@ export default function EditDraftPage() {
             null,
         );
 
+    const hasRecoveryChanges =
+        isEditDraftRecoveryChanged(
+            watchedValues,
+            savedDraftRef.current,
+        );
     /* ---------------------------------------------------------------------- */
     /*                          REACT HOOK FORM WATCHERS                      */
     /* ---------------------------------------------------------------------- */
@@ -273,8 +292,12 @@ export default function EditDraftPage() {
         form.formState.errors
             .tags?.message;
 
-    const hasUnsavedChanges =
+    const hasUnsavedFormChanges =
         form.formState.isDirty ||
+        hasRecoveryChanges;
+
+    const hasUnsavedChanges =
+        hasUnsavedFormChanges ||
         newImages.length > 0 ||
         removedImagePublicIds.length > 0;
 
@@ -328,6 +351,83 @@ export default function EditDraftPage() {
     /*                               EFFECTS                                  */
     /* ---------------------------------------------------------------------- */
 
+    useEffect(() => {
+
+        /*
+         * We need the authenticated user,
+         * the current draft, and the server
+         * baseline before saving recovery.
+         */
+        if (
+            !user?.id ||
+            !draftId ||
+            !savedDraftRef.current
+        ) {
+            return;
+        }
+
+        /*
+         * The current form matches the latest
+         * server-saved draft.
+         *
+         * There is nothing to recover.
+         */
+        if (!hasRecoveryChanges) {
+
+            clearEditDraftRecovery();
+
+            return;
+        }
+
+        /*
+         * Debounce local-storage writes.
+         *
+         * This prevents a write on every
+         * single keystroke.
+         */
+        const timeoutId =
+            window.setTimeout(() => {
+
+                saveEditDraftRecovery(
+                    user.id,
+                    draftId,
+                    {
+                        title:
+                            watchedValues.title ??
+                            "",
+
+                        content:
+                            watchedValues.content ??
+                            "",
+
+                        mood:
+                            watchedValues.mood ??
+                            null,
+
+                        tags:
+                            watchedValues.tags ??
+                            [],
+                    },
+                );
+
+            }, 500);
+
+        return () => {
+            window.clearTimeout(
+                timeoutId,
+            );
+        };
+
+    }, [
+        user?.id,
+        draftId,
+        watchedValues.title,
+        watchedValues.content,
+        watchedValues.mood,
+        watchedValues.tags,
+        hasRecoveryChanges,
+    ]);
+
     /**
      * Keep the latest image state available
      * to the cleanup effect below.
@@ -377,77 +477,123 @@ export default function EditDraftPage() {
      */
     useEffect(() => {
 
-        if (!draft) {
-            return;
-        }
-
-
+        /*
+         * We cannot initialize until both the
+         * authenticated user and server draft
+         * are available.
+         */
         if (
-            initializedDraftIdRef.current ===
-            draft.id
+            !user?.id ||
+            !draft
         ) {
             return;
         }
 
+        /*
+         * Recovery belongs to this exact
+         * user + draft combination.
+         */
+        const draftKey =
+            `${user.id}:${draft.id}`;
 
-        initializedDraftIdRef.current =
-            draft.id;
+        /*
+         * Prevent repeated initialization
+         * of the same draft.
+         */
+        if (
+            initializedDraftKeyRef.current ===
+            draftKey
+        ) {
+            return;
+        }
 
-        /**
+        initializedDraftKeyRef.current =
+            draftKey;
+
+
+        /*
          * --------------------------------
-         * SAVE CURRENT SERVER BASELINE
+         * SERVER DRAFT = BASELINE
          * --------------------------------
          */
-        savedDraftRef.current = draft;
 
-        /**
-         * ------------------------------
-         * POPULATE RHF
-         * ------------------------------
+        savedDraftRef.current =
+            draft;
+
+
+        /*
+         * --------------------------------
+         * LOAD LOCAL RECOVERY
+         * --------------------------------
          */
 
-        form.reset({
-
-            title:
-                draft.title,
-
-            content:
-                draft.content,
-
-            mood:
-                draft.mood,
-
-            tags:
-                draft.tags,
-
-        });
+        const recoveredData =
+            loadEditDraftRecovery(
+                user.id,
+                draft.id,
+            );
 
 
-        /**
-         * ------------------------------
-         * POPULATE EXISTING IMAGES
-         * ------------------------------
+        /*
+         * --------------------------------
+         * INITIAL FORM VALUES
+         * --------------------------------
+         */
+
+        form.reset(
+            recoveredData ?? {
+                title:
+                    draft.title,
+
+                content:
+                    draft.content,
+
+                mood:
+                    draft.mood,
+
+                tags:
+                    draft.tags ?? [],
+            },
+        );
+
+
+        /*
+         * --------------------------------
+         * SERVER IMAGE STATE
+         * --------------------------------
          *
-         * These images already exist
-         * on the backend.
+         * Images are intentionally outside
+         * Phase A recovery.
          */
 
         setExistingImages(
             draft.images ?? [],
         );
 
-
-        /**
-         * ------------------------------
-         * RESET LOCAL IMAGE CHANGES
-         * ------------------------------
-         */
-
         setNewImages([]);
 
         setRemovedImagePublicIds([]);
 
+
+        /*
+         * --------------------------------
+         * RECOVERY FEEDBACK
+         * --------------------------------
+         */
+
+        if (recoveredData) {
+
+            toast.info(
+                "Unsaved draft changes restored",
+                {
+                    description:
+                        "Your previous changes to this draft have been restored.",
+                },
+            );
+        }
+
     }, [
+        user?.id,
         draft,
         form,
     ]);
@@ -739,16 +885,33 @@ export default function EditDraftPage() {
                     updatedDraft,
                 ) => {
 
-                    // SAVE NEW BASELINE
+                    /*
+                     * --------------------------------
+                     * CLEAR LOCAL RECOVERY
+                     * --------------------------------
+                     *
+                     * The latest editor state now exists
+                     * on the server.
+                     */
+                    clearEditDraftRecovery();
+
+
+                    /*
+                     * --------------------------------
+                     * SAVE NEW SERVER BASELINE
+                     * --------------------------------
+                     */
+
                     savedDraftRef.current =
                         updatedDraft;
 
-                    /**
-                     * Release local preview URLs.
-                     *
-                     * These are temporary object URLs
-                     * created for newly selected images.
+
+                    /*
+                     * --------------------------------
+                     * RELEASE LOCAL IMAGE PREVIEWS
+                     * --------------------------------
                      */
+
                     newImages.forEach(
                         (image) => {
 
@@ -760,12 +923,10 @@ export default function EditDraftPage() {
                     );
 
 
-                    /**
-                     * The returned JournalResponse is now
-                     * our new local baseline.
-                     *
-                     * This is important because we're
-                     * staying on the Edit Draft page.
+                    /*
+                     * --------------------------------
+                     * RESET FORM TO SERVER STATE
+                     * --------------------------------
                      */
 
                     form.reset({
@@ -779,34 +940,38 @@ export default function EditDraftPage() {
                             updatedDraft.mood,
 
                         tags:
-                            updatedDraft.tags,
+                            updatedDraft.tags ?? [],
                     });
 
 
-                    /**
-                     * Replace existing image state with
-                     * the server's updated image collection.
+                    /*
+                     * --------------------------------
+                     * SYNCHRONIZE SERVER IMAGES
+                     * --------------------------------
                      */
+
                     setExistingImages(
                         updatedDraft.images ?? [],
                     );
 
 
-                    /**
-                     * Clear temporary local image state.
+                    /*
+                     * --------------------------------
+                     * CLEAR TEMPORARY IMAGE STATE
+                     * --------------------------------
                      */
+
                     setNewImages([]);
 
-
-                    /**
-                     * Clear pending server-image removals.
-                     */
                     setRemovedImagePublicIds([]);
 
 
-                    /**
-                     * Success feedback.
+                    /*
+                     * --------------------------------
+                     * SUCCESS FEEDBACK
+                     * --------------------------------
                      */
+
                     toast.success(
                         "Draft saved successfully",
                         {
@@ -883,35 +1048,60 @@ export default function EditDraftPage() {
 
     const handleConfirmDiscard = () => {
 
-        /**
-         * Don't allow discard while
-         * saving the draft.
+        /*
+         * --------------------------------
+         * PREVENT DISCARD DURING ACTION
+         * --------------------------------
          */
+
         if (isDraftActionPending) {
             return;
         }
 
 
+        /*
+         * --------------------------------
+         * GET SERVER BASELINE
+         * --------------------------------
+         */
+
         const savedDraft =
             savedDraftRef.current;
 
 
-        /**
-         * We cannot restore a baseline if
-         * one has not been established.
+        /*
+         * --------------------------------
+         * SAFETY CHECK
+         * --------------------------------
+         *
+         * We cannot restore anything if
+         * the server baseline has not been
+         * established yet.
          */
+
         if (!savedDraft) {
-            setIsDiscardDialogOpen(false);
+
+            setIsDiscardDialogOpen(
+                false,
+            );
 
             return;
         }
 
 
-        /**
+        /*
          * --------------------------------
-         * REVOKE LOCAL PREVIEW URLS
+         * REVOKE LOCAL IMAGE PREVIEWS
          * --------------------------------
+         *
+         * Images are not part of Phase A
+         * recovery, but newly selected
+         * images still exist in local state.
+         *
+         * They must be cleaned up when
+         * discarding.
          */
+
         newImages.forEach(
             (image) => {
 
@@ -923,11 +1113,24 @@ export default function EditDraftPage() {
         );
 
 
-        /**
+        /*
          * --------------------------------
-         * RESTORE RHF
+         * CLEAR LOCAL RECOVERY
+         * --------------------------------
+         *
+         * The user explicitly chose to
+         * discard all unsaved changes.
+         */
+
+        clearEditDraftRecovery();
+
+
+        /*
+         * --------------------------------
+         * RESTORE SERVER FORM STATE
          * --------------------------------
          */
+
         form.reset({
             title:
                 savedDraft.title,
@@ -939,45 +1142,49 @@ export default function EditDraftPage() {
                 savedDraft.mood,
 
             tags:
-                savedDraft.tags,
+                savedDraft.tags ?? [],
         });
 
 
-        /**
+        /*
          * --------------------------------
-         * RESTORE EXISTING SERVER IMAGES
+         * RESTORE SERVER IMAGES
          * --------------------------------
          */
+
         setExistingImages(
             savedDraft.images ?? [],
         );
 
 
-        /**
+        /*
          * --------------------------------
          * CLEAR LOCAL IMAGE CHANGES
          * --------------------------------
          */
+
         setNewImages([]);
 
         setRemovedImagePublicIds([]);
 
 
-        /**
+        /*
          * --------------------------------
          * CLOSE DIALOG
          * --------------------------------
          */
+
         setIsDiscardDialogOpen(
             false,
         );
 
 
-        /**
+        /*
          * --------------------------------
-         * FEEDBACK
+         * SUCCESS FEEDBACK
          * --------------------------------
          */
+
         toast.success(
             "Changes discarded",
             {
@@ -991,10 +1198,23 @@ export default function EditDraftPage() {
         publishedJournal: JournalResponse,
     ) => {
 
-        /**
-         * The draft has now become a
-         * published journal.
+        /*
+         * --------------------------------
+         * CLEAR LOCAL RECOVERY
+         * --------------------------------
+         *
+         * The draft is no longer an editable
+         * draft because it has been published.
          */
+        clearEditDraftRecovery();
+
+
+        /*
+         * --------------------------------
+         * SUCCESS FEEDBACK
+         * --------------------------------
+         */
+
         toast.success(
             "Draft published successfully",
             {
@@ -1004,10 +1224,12 @@ export default function EditDraftPage() {
         );
 
 
-        /**
-         * Navigate to the normal Journal
-         * Details page.
+        /*
+         * --------------------------------
+         * NAVIGATE TO JOURNAL DETAILS
+         * --------------------------------
          */
+
         navigate(
             buildJournalDetailsRoute(
                 publishedJournal.id,
@@ -1071,36 +1293,49 @@ export default function EditDraftPage() {
          */
     };
 
-    const validateCurrentDraft =
+    const validatePublishDraft =
         (
             values: EditDraftFormValues,
-        ): boolean => {
-
-            const hasImages =
-                existingImages.length > 0 ||
-                newImages.length > 0;
-
-            const empty =
-                isDraftEmpty({
+        ): values is PublishDraftFormValues => {
+            const result =
+                publishDraftSchema.safeParse(
                     values,
-                    hasImages,
-                });
-
-            if (empty) {
-
-                toast.error(
-                    "Draft is empty",
-                    {
-                        description:
-                            "Add at least a title, content, mood, tag, or image before publishing.",
-                    },
                 );
 
-                return false;
+            if (result.success) {
+                return true;
             }
 
-            return true;
-    };
+            /*
+             * Push every schema error into
+             * React Hook Form so the individual
+             * field components can display it.
+             */
+            result.error.issues.forEach(
+                (issue) => {
+                    const field =
+                        issue.path[0];
+
+                    if (
+                        field === "title" ||
+                        field === "content" ||
+                        field === "mood" ||
+                        field === "tags"
+                    ) {
+                        form.setError(
+                            field,
+                            {
+                                type: "manual",
+                                message:
+                                    issue.message,
+                            },
+                        );
+                    }
+                },
+            );
+
+            return false;
+        };
 
     const handlePublishDraft = (
         values: EditDraftFormValues,
@@ -1139,12 +1374,13 @@ export default function EditDraftPage() {
 
         /**
          * --------------------------------
-         * EMPTY-DRAFT VALIDATION
+         * PUBLISH VALIDATION
          * --------------------------------
+         *  Publishing is stricter than saving.
          */
 
         if (
-            !validateCurrentDraft(
+            !validatePublishDraft(
                 values,
             )
         ) {
@@ -1192,6 +1428,17 @@ export default function EditDraftPage() {
                     onSuccess: (
                         updatedDraft,
                     ) => {
+
+                        /*
+                         * --------------------------------
+                         * CLEAR LOCAL RECOVERY
+                         * --------------------------------
+                         *
+                         * The latest editor state has now
+                         * been successfully persisted to
+                         * the backend.
+                         */
+                        clearEditDraftRecovery();
 
                         /**
                          * We have now saved the latest
