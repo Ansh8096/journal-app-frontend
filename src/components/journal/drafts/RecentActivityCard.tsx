@@ -16,8 +16,8 @@ import {
 
 import { useDraftList } from "@/hooks/journal/useDraftList";
 
-import { mapJournalSummaryToDraftCard } from "@/utils/drafts/draft.mapper";
-import { formatRelativeTime } from "@/utils/formatRelativeTime";
+import { mapJournalSummaryToDraftCard } from "@/utils/journals/drafts/draft.mapper";
+import { formatRelativeTime } from "@/utils/formatting/formatRelativeTime";
 
 const ACTIVITY_DOT_COLORS = [
     "text-emerald-500",

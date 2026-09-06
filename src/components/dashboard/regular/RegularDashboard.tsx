@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import JournalStatsSkeleton from "./skeleton/JournalStatsSkeleton";
 import { useWeather } from "@/hooks/weather/useWeather";
 import { getWeatherIcon, getWeatherIconColor } from "@/constants/journal/journal-weather";
-import { formatTemperature } from "@/utils/weatherFormatters";
+import { formatTemperature } from "@/utils/weather/weatherFormatters";
 
 export default function RegularDashboard() {
     const {

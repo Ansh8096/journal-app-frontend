@@ -1,8 +1,8 @@
-import storage from "@/utils/storage";
+import storage from "@/utils/storage/storage";
 
 import {
     STORAGE_KEYS,
-} from "@/constants/storage";
+} from "@/constants/app/storage";
 
 import {
     editDraftRecoverySchema,

@@ -27,7 +27,7 @@ import type {
 
 import {
     mapJournalSummaryToDraftCard,
-} from "@/utils/drafts/draft.mapper";
+} from "@/utils/journals/drafts/draft.mapper";
 
 import DraftPreviewCard from "./DraftPreviewCard";
 

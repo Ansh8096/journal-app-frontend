@@ -88,7 +88,7 @@ import type {
 
 import {
     buildUpdateJournalPayload,
-} from "@/utils/build-update-journal-payload";
+} from "@/utils/journals/build-update-journal-payload";
 
 import {
     toast,
@@ -100,7 +100,7 @@ import {
 
 import {
     buildJournalDetailsRoute,
-} from "@/constants/routes";
+} from "@/constants/app/routes";
 
 import JournalEditLayout
     from "@/components/journal/edit/layout/JournalEditLayout";

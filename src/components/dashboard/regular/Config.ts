@@ -9,7 +9,7 @@ import {
     type LucideIcon,
 } from "lucide-react";
 
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 
 export interface QuickAction {
     title: string;

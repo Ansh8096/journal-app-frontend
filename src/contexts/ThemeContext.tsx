@@ -8,7 +8,7 @@ import {
     type ReactNode,
 } from "react";
 
-import storage from "@/utils/storage";
+import storage from "@/utils/storage/storage";
 
 export type Theme =
     | "light"

@@ -4,7 +4,7 @@ import {
     shareContent,
     type ShareContentOptions,
     type ShareContentResult,
-} from "@/utils/shareContent";
+} from "@/utils/journals/shareContent";
 
 export function useShareJournal() {
     const [isSharing, setIsSharing] = useState(false);

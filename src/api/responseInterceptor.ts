@@ -4,7 +4,7 @@ import type {
 } from "axios";
 import { AppError } from "@/lib/error";
 import type { ErrorResponse } from "@/types/api/error";
-import { ERROR_MESSAGES } from "@/constants/error";
+import { ERROR_MESSAGES } from "@/constants/app/error";
 
 
 export function  handleResponse<T>(response: AxiosResponse<T>) {

@@ -3,8 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import userService from "@/services/user.service";
 
 import type { ChangeEmailFormData, PreferencesFormData, UsernameFormData } from "@/schemas/profile/personal-information";
-import storage from "@/utils/storage";
-import { STORAGE_KEYS } from "@/constants/storage";
+import storage from "@/utils/storage/storage";
+import { STORAGE_KEYS } from "@/constants/app/storage";
 
 export type MutationResult = {
     updated: boolean;

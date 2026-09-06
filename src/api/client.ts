@@ -1,6 +1,6 @@
 import axios from "axios"
-import storage from "@/utils/storage";
-import { STORAGE_KEYS } from "@/constants/storage";
+import storage from "@/utils/storage/storage";
+import { STORAGE_KEYS } from "@/constants/app/storage";
 import { handleResponse, handleResponseError } from "./responseInterceptor";
 
 const client = axios.create({

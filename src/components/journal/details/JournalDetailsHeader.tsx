@@ -8,7 +8,7 @@ import { journalDetailsConfig } from "./JournalDetailsConfig";
 import type { JournalResponse } from "@/types/api/journal";
 
 import JournalActionBar from "./JournalActionBar";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 
 interface JournalDetailsHeaderProps {
     journal: JournalResponse;

@@ -27,7 +27,7 @@ import {
 } from "@/schemas/auth/auth.schema";
 
 import { useAuth } from "@/hooks/useAuth";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/error";

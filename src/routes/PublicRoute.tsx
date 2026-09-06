@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 import { useAuth } from "@/hooks/useAuth";
 import FullscreenLoader from "@/components/common/FullscreenLoader";
 

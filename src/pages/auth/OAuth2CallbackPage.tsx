@@ -16,7 +16,7 @@ import {
 
 import {
     ROUTES,
-} from "@/constants/routes";
+} from "@/constants/app/routes";
 
 export default function OAuth2CallbackPage() {
 

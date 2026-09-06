@@ -46,7 +46,7 @@ import type {
 
 import {
     extractImageFiles,
-} from "@/utils/image-payload";
+} from "@/utils/media/image-payload";
 
 import {
     useCreateDraft,
@@ -63,7 +63,7 @@ import {
 
 import {
     buildJournalDetailsRoute,
-} from "@/constants/routes";
+} from "@/constants/app/routes";
 import { isDraftEmpty } from "@/lib/validation/isDraftEmpty";
 import { hasUnsavedJournalData } from "@/lib/validation/hasUnsavedJournalData";
 import { clearCreateJournalRecovery } from "@/lib/journal/create-journal-recovery";

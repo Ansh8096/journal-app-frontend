@@ -7,7 +7,7 @@ import {
 } from "@/constants/journal/journal-weather";
 import type { WeatherData } from "@/types/api/weather";
 import { cn } from "@/lib/utils";
-import { formatHumidity, formatTemperature, formatWind } from "@/utils/weatherFormatters";
+import { formatHumidity, formatTemperature, formatWind } from "@/utils/weather/weatherFormatters";
 
 export interface WeatherMetricsProps {
     weather: Pick<

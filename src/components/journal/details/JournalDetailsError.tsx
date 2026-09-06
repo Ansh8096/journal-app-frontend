@@ -6,7 +6,7 @@ import {
     Card,
     CardContent,
 } from "@/components/ui/card";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 
 interface JournalDetailsErrorProps {
     onRetry: () => void;

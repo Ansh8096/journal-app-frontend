@@ -27,7 +27,7 @@ import { DEFAULT_JOURNAL_SORT } from "@/constants/journal/journal-sort";
 // Reuse the exact mood configuration from Journal Details.
 import { MOOD_OPTIONS } from "@/constants/journal/journal-details";
 
-import { htmlToText } from "@/utils/htmlToText";
+import { htmlToText } from "@/utils/media/htmlToText";
 
 
 // ---------------------------------------------------------

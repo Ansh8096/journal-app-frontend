@@ -1,6 +1,6 @@
-import { ERROR_MESSAGES } from "@/constants/error";
+import { ERROR_MESSAGES } from "@/constants/app/error";
 import { AppError } from "./AppError";
-import { HTTP_STATUS } from "@/constants/http";
+import { HTTP_STATUS } from "@/constants/app/http";
 
 // Returns true if the value is an AppError.
 export function isAppError(

@@ -4,7 +4,7 @@ import SignupPage from "@/pages/auth/SignupPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import PublicRoute from "@/routes/PublicRoute";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 import JournalPage from "@/pages/journal/MyJournalsPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
 import DashBoardPage from "@/pages/dashboard/DashboardPage";

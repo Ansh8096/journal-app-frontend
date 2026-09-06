@@ -18,9 +18,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { buildEditDraftRoute } from "@/constants/routes";
+import { buildEditDraftRoute } from "@/constants/app/routes";
 
-import { formatRelativeTime } from "@/utils/formatRelativeTime";
+import { formatRelativeTime } from "@/utils/formatting/formatRelativeTime";
 
 import { useDeleteDraft } from "@/hooks/journal/useDeleteDraft";
 

@@ -19,7 +19,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { buildJournalDetailsRoute } from "@/constants/routes";
+import { buildJournalDetailsRoute } from "@/constants/app/routes";
 
 import {
     journalRowConfig,

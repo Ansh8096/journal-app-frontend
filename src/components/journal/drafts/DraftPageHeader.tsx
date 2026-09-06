@@ -2,7 +2,7 @@ import { FileText, Plus } from "lucide-react";
 import { draftPageConfig } from "./Config";
 import PageHeader from "@/components/common/PageHeader";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 
 export default function DraftPageHeader() {
     const navigate = useNavigate();

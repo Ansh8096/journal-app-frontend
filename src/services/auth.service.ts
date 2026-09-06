@@ -2,7 +2,7 @@ import authApi from "@/api/auth.api";
 
 import {
     STORAGE_KEYS,
-} from "@/constants/storage";
+} from "@/constants/app/storage";
 
 import type {
     LoginRequest,
@@ -14,7 +14,7 @@ import type {
     MessageResponse,
 } from "@/types/api/common";
 
-import storage from "@/utils/storage";
+import storage from "@/utils/storage/storage";
 
 class AuthService {
 

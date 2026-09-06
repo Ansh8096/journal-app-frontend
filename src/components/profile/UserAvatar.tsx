@@ -25,11 +25,11 @@ import { profileConfig } from "./Config";
 
 import {
     getUserInitials,
-} from "@/utils/user";
+} from "@/utils/user/user";
 
 import {
     formatDate,
-} from "@/utils/date";
+} from "@/utils/formatting/date";
 
 import {
     ChangeAvatarDialog,

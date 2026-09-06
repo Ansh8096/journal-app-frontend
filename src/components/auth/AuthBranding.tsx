@@ -1,6 +1,6 @@
 import { BookOpen, Quote } from "lucide-react";
 
-import type { AuthBrandingContent } from "@/constants/auth-branding.tsx";
+import type { AuthBrandingContent } from "@/constants/auth/auth-branding";
 
 interface AuthBrandingProps {
     content: AuthBrandingContent;

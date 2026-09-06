@@ -23,11 +23,11 @@ import {
 } from "@/components/journal/details/JournalDetailsConfig";
 
 import EmptyStateCard from "@/components/common/EmptyStateCard";
-import { buildEditJournalRoute, ROUTES } from "@/constants/routes";
+import { buildEditJournalRoute, ROUTES } from "@/constants/app/routes";
 import JournalDetailsSkeleton from "@/components/journal/details/skeleton/JournalDetailsSkeleton";
 import JournalDetailsError from "@/components/journal/details/JournalDetailsError";
 import type { JournalResponse } from "@/types/api/journal";
-import { downloadFile } from "@/utils/downloadFile";
+import { downloadFile } from "@/utils/media/downloadFile";
 import { toast } from "sonner";
 import { useRef, useState } from "react";
 import DeleteJournalDialog from "@/components/journal/details/dialog/DeleteJournalDialog";

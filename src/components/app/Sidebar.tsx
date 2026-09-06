@@ -18,7 +18,7 @@ import {
 
 import { NavLink } from 'react-router-dom';
 import { Separator} from '@/components/ui/separator';
-import { ROUTES } from '@/constants/routes';
+import { ROUTES } from '@/constants/app/routes';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '../ui/button';
 import SidebarDarkLogo from '@/assets/sidebar_dark_logo.png'

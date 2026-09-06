@@ -1,4 +1,4 @@
-import { buildJournalDetailsRoute } from "@/constants/routes";
+import { buildJournalDetailsRoute } from "@/constants/app/routes";
 import JournalCard from "./JournalCard";
 
 import type { JournalSummary } from "@/types/api/journal";

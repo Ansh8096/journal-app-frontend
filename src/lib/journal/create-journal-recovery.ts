@@ -1,5 +1,5 @@
-import storage from "@/utils/storage";
-import { STORAGE_KEYS } from "@/constants/storage";
+import storage from "@/utils/storage/storage";
+import { STORAGE_KEYS } from "@/constants/app/storage";
 
 import {
     createJournalRecoverySchema,

@@ -19,7 +19,7 @@ import {
     formatJournalImageCount,
     getJournalDateTime,
     getWordCount
-} from "@/utils/journal-utils";
+} from "@/utils/journals/journal-utils";
 
 import { Badge } from "@/components/ui/badge";
 import { moodConfig } from "./JournalDetailsConfig";

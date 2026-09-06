@@ -2,7 +2,7 @@ import type { JournalSummary } from "@/types/api/journal";
 
 import type { DraftCardData } from "@/types/journal/draft.types";
 
-import { htmlToText } from "@/utils/htmlToText";
+import { htmlToText } from "@/utils/media/htmlToText";
 
 export function mapJournalSummaryToDraftCard(
     draft: JournalSummary,

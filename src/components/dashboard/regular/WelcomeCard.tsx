@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { getGreeting } from "@/utils/greeting";
+import { getGreeting } from "@/utils/formatting/greeting";
 import welcomeIllustration from '@/assets/welcome-illustration.png'
 
 const WelcomeCard = () => {

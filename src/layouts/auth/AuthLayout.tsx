@@ -1,6 +1,6 @@
 // AuthLayout.tsx
 import type { ReactNode } from "react";
-import type { AuthBrandingContent } from "@/constants/auth-branding";
+import type { AuthBrandingContent } from "@/constants/auth/auth-branding";
 import AuthBranding from "@/components/auth/AuthBranding";
 
 export interface AuthLayoutProps {

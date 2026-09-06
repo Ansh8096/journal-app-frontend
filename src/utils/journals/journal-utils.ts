@@ -4,7 +4,7 @@ import { journalListUI, journalMoodConfig } from "@/components/journal/list/Jour
 
 import type { JournalStatisticsResponse } from "@/types/api/journal";
 
-import { formatDate } from "./date";
+import { formatDate } from "../formatting/date";
 
 
 // ======================

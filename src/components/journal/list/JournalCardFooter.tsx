@@ -17,7 +17,7 @@ import {
 
 import {
     buildEditJournalRoute,
-} from "@/constants/routes";
+} from "@/constants/app/routes";
 
 import type {
     JournalSummary,

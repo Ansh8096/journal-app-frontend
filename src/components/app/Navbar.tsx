@@ -28,8 +28,8 @@ import { Button } from "../ui/button";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import {ROUTES} from "@/constants/routes"
-import { getUserInitials } from "@/utils/user";
+import {ROUTES} from "@/constants/app/routes"
+import { getUserInitials } from "@/utils/user/user";
 import ThemeToggle from "./ThemeToggle";
 
 type NavbarProps = {

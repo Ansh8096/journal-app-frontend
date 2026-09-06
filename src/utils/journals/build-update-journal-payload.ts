@@ -1,10 +1,10 @@
 import type {
-    UpdateDraftRequest,
+    UpdateJournalRequest,
 } from "@/types/api/journal";
 
 import type {
-    EditDraftFormValues,
-} from "@/schemas/journal/edit-draft.schema";
+    EditJournalFormValues,
+} from "@/schemas/journal/edit-journal.schema";
 
 import type {
     SelectedImage,
@@ -12,59 +12,50 @@ import type {
 
 import {
     extractImageFiles,
-} from "@/utils/image-payload";
+} from "@/utils/media/image-payload";
 
 
 /* -------------------------------------------------------------------------- */
 /*                                  RESULT                                    */
 /* -------------------------------------------------------------------------- */
 
-export interface UpdateDraftPayload {
-
-    request:
-        UpdateDraftRequest;
-
-    images:
-        File[];
+export interface UpdateJournalPayload {
+    request: UpdateJournalRequest;
+    images: File[];
 }
 
 
 /* -------------------------------------------------------------------------- */
-/*                           BUILD UPDATE PAYLOAD                             */
+/*                               BUILD PAYLOAD                                */
 /* -------------------------------------------------------------------------- */
 
 /**
- * Converts the current Edit Draft state into
- * the data expected by useUpdateDraft().
+ * Combines:
  *
- * This function does NOT:
+ * - React Hook Form values
+ * - newly selected local images
+ * - removed existing-image public IDs
  *
- * - call the API
- * - create FormData
- * - modify React state
+ * into the exact data required by
+ * the update mutation.
  *
- * It only transforms UI state into:
- *
- * {
- *     request,
- *     images
- * }
+ * No API call is performed here.
  */
-export function buildUpdateDraftPayload(
-    values: EditDraftFormValues,
+export function buildUpdateJournalPayload(
+    values: EditJournalFormValues,
     newImages: SelectedImage[],
     removedImagePublicIds: string[],
-): UpdateDraftPayload {
+): UpdateJournalPayload {
 
     /**
      * --------------------------------------------------------------
-     * EXTRACT NEW IMAGE FILES
+     * NEW IMAGE FILES
      * --------------------------------------------------------------
      *
      * SelectedImage is UI state.
      *
-     * The API/service layer expects actual
-     * File objects.
+     * The API/service layer only needs
+     * the actual File objects.
      */
     const imageFiles =
         extractImageFiles(
@@ -74,39 +65,40 @@ export function buildUpdateDraftPayload(
 
     /**
      * --------------------------------------------------------------
-     * BUILD DRAFT REQUEST
+     * BUILD REQUEST
      * --------------------------------------------------------------
+     *
+     * We intentionally send:
+     *
+     * - title
+     * - content
+     * - mood (when selected)
+     * - tags
+     * - removed image public IDs
+     *
+     * Tags are always included so that:
+     *
+     * ["travel", "vacation"]
+     *
+     * can be changed to:
+     *
+     * []
+     *
+     * and the backend can clear them.
      */
 
     const request:
-        UpdateDraftRequest =
+        UpdateJournalRequest =
     {
-        /**
-         * Empty title is allowed for drafts.
-         */
         title:
             values.title.trim(),
 
-        /**
-         * Empty content is allowed for drafts.
-         */
         content:
             values.content,
 
-        /**
-         * Empty tags must be sent as []
-         * so the user can clear all tags.
-         */
         tags:
             values.tags,
 
-        /**
-         * The backend contract currently
-         * uses mood?: Mood, not Mood | null.
-         *
-         * Therefore null means:
-         * "don't send a mood field."
-         */
         ...(values.mood !== null
             ? {
                 mood:
@@ -114,10 +106,6 @@ export function buildUpdateDraftPayload(
             }
             : {}),
 
-        /**
-         * Only include removed image IDs
-         * when there are actual removals.
-         */
         ...(removedImagePublicIds.length > 0
             ? {
                 removeImagePublicIds:
@@ -129,7 +117,6 @@ export function buildUpdateDraftPayload(
 
     return {
         request,
-
         images:
             imageFiles,
     };

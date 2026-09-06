@@ -22,7 +22,7 @@ import {
     CardContent,
 } from "@/components/ui/card";
 
-import { buildEditDraftRoute } from "@/constants/routes";
+import { buildEditDraftRoute } from "@/constants/app/routes";
 
 import {
     useDeleteDraft,
@@ -34,7 +34,7 @@ import type {
 
 import {
     formatRelativeTime,
-} from "@/utils/formatRelativeTime";
+} from "@/utils/formatting/formatRelativeTime";
 
 import DeleteDraftDialog from "./DeleteDraftDialog";
 

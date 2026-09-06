@@ -15,7 +15,7 @@ import {
 
 import {
     formatTemperature,
-} from "@/utils/weatherFormatters";
+} from "@/utils/weather/weatherFormatters";
 
 export interface WeatherDisplayProps {
     weather: Pick<

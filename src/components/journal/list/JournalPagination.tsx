@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { journalPageConfig } from "./JournalListConfig";
 import { cn } from "@/lib/utils";
-import { getPaginationCounter, getVisiblePages } from "@/utils/pagination";
+import { getPaginationCounter, getVisiblePages } from "@/utils/journals/pagination";
 
 interface JournalPaginationProps {
     page: number;

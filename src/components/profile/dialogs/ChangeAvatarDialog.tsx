@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { PROFILE_IMAGE } from "@/constants/image";
+import { PROFILE_IMAGE } from "@/constants/app/image";
 
 import {
     Avatar,
@@ -23,7 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 import { profileConfig } from "../Config";
 
-import { getUserInitials } from "@/utils/user";
+import { getUserInitials } from "@/utils/user/user";
 import { useProfileMutations } from "@/hooks/useProfileMutations";
 import LoadingSubmitButton from "@/components/common/LoadingSubmitButton";
 import { getErrorMessage } from "@/lib/error";

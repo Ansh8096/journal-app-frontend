@@ -10,7 +10,7 @@ import {
 
 import { InfoRow } from "./InfoRow";
 import { profileConfig } from "./Config";
-import { formatDate } from "@/utils/date";
+import { formatDate } from "@/utils/formatting/date";
 import { CalendarDays } from "lucide-react";
 
 export function AccountInformationCard() {

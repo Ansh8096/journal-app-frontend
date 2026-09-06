@@ -1,6 +1,6 @@
 import StatsCard from "../../common/StatsCard";
 
-import { buildJournalStats } from "@/utils/journal-utils";
+import { buildJournalStats } from "@/utils/journals/journal-utils";
 
 import type { JournalStatisticsResponse } from "@/types/api/journal";
 

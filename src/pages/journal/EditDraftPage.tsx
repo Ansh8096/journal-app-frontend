@@ -90,10 +90,10 @@ import type {
     JournalImageResponse,
     JournalResponse,
 } from "@/types/api/journal";
-import { buildUpdateDraftPayload } from "@/utils/build-update-draft-payload";
+import { buildUpdateDraftPayload } from "@/utils/journals/drafts/build-update-draft-payload";
 import { isDraftEmpty } from "@/lib/validation/isDraftEmpty";
 import { getErrorMessage } from "@/lib/error";
-import { buildJournalDetailsRoute } from "@/constants/routes";
+import { buildJournalDetailsRoute } from "@/constants/app/routes";
 import { useWeather } from "@/hooks/weather/useWeather";
 import { publishDraftSchema, type PublishDraftFormValues } from "@/schemas/journal/publish-draft.schema";
 import { useAuth } from "@/hooks/useAuth";

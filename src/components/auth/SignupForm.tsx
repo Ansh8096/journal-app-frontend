@@ -36,7 +36,7 @@ import { Switch } from "@/components/ui/switch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import authService from "@/services/auth.service";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/error";
 import { applyServerFormError } from "@/lib/forms/server-form-error";

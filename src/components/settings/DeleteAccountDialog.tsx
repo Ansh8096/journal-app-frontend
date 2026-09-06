@@ -62,7 +62,7 @@ import {
     type DeleteAccountFormData,
 } from "@/schemas/profile/delete-account";
 
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/app/routes";
 
 interface DeleteAccountDialogProps {
     open: boolean;
